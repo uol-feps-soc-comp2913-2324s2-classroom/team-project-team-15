@@ -1,0 +1,180 @@
+/* styles.css */
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+  }
+  
+  .container {
+    width: 80%;
+    margin: 0 auto;
+  }
+  
+  header {
+    background-color: #ff8165;
+    padding: 20px 0;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .logo {
+    width: 100px;
+  }
+  
+  nav {
+    display: flex;
+    align-items: center;
+  }
+  
+  nav a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 20px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  nav a:hover {
+    background-color: #7c7b7b;
+  }
+  
+  nav button {
+    padding: 10px 20px;
+    margin-left: auto;
+    background-color: #fff;
+    color: #ff8165;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  nav button:hover {
+    background-color:#7c7b7b;
+    color: #fff;
+  }
+  
+  nav button:nth-of-type(1) {
+    margin-left: 550px;
+    margin-right: 10px; /* Optional: Add some spacing between the buttons */
+}
+  nav button:first-of-type {
+    margin-right: 10px;
+  }
+  
+  main {
+    padding: 50px 0;
+  }
+  
+  section {
+    margin-bottom: 80px;
+  }
+  
+  h2 {
+    margin-bottom: 30px;
+  }
+  
+  .features {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .feature {
+    flex-basis: calc(33.333% - 20px);
+    text-align: center;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .feature i {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: #ff8165;
+  }
+  
+  .pricing-section {
+    background-color: #f9f9f9;
+    padding: 50px 0;
+  }
+  
+  .pricing-plans {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .pricing-plan {
+    flex-basis: calc(50% - 20px);
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .pricing-plan h3 {
+    color: #ff8165;
+  }
+  
+  .pricing-plan p {
+    font-size: 24px;
+    margin: 20px 0;
+  }
+  
+  .pricing-plan span {
+    font-size: 16px;
+    color: #888;
+  }
+  
+  .pricing-plan ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .pricing-plan ul li {
+    margin-bottom: 10px;
+  }
+  
+  .contact-section {
+    background-color: #ff8165;
+    color: #fff;
+    padding: 80px 0;
+  }
+  
+  .contact-section p {
+    font-size: 24px;
+  }
+  
+  .contact-section form {
+    margin-top: 40px;
+  }
+  
+  .contact-section input,
+  .contact-section textarea {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  .contact-section button {
+    padding: 15px 40px;
+    background-color: #fff;
+    color: #ff8165;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  footer {
+    background-color: #7c7b7b;
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+  }
+  
