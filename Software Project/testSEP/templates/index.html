@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
 <head>
     <title>Route Finder</title>
@@ -124,5 +124,120 @@
         {% endfor %}
     </ol>
     {% endif %}
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Route Finder</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_IDAXXGAVJYlMrrRt6gpBDhumrkQ-CbY"></script>
+    <script>
+        var directionsService;
+        var directionsRenderer;
+        var map;
+        var journeyStarted = false;
+
+        function initMap() {
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    var mapOptions = {
+                        zoom: 12,
+                        center: userLocation
+                    };
+
+                    map = new google.maps.Map(document.getElementById('map'), mapOptions);
+                    directionsRenderer.setMap(map);
+                }, function() {
+                    var defaultLocation = { lat: 53.80815489338595, lng: -1.5439173678765745};
+                    var mapOptions = {
+                        zoom: 7,
+                        center: defaultLocation
+                    };
+
+                    map = new google.maps.Map(document.getElementById('map'), mapOptions);
+                    directionsRenderer.setMap(map);
+                });
+            } else {
+                var defaultLocation = { lat: 53.80815489338595, lng: -1.5439173678765745};
+                var mapOptions = {
+                    zoom: 7,
+                    center: defaultLocation
+                };
+
+                map = new google.maps.Map(document.getElementById('map'), mapOptions);
+                directionsRenderer.setMap(map);
+            }
+        }
+
+        function calculateRoute() {
+            var origin = document.getElementById('origin').value;
+            var destination = document.getElementById('destination').value;
+            var travelMode = document.getElementById('travel-mode').value;
+            var request = {
+                origin: origin,
+                destination: destination,
+                travelMode: travelMode
+            };
+            directionsService.route(request, function(result, status) {
+                if (status == 'OK') {
+                    directionsRenderer.setDirections(result);
+                }
+            });
+        }
+
+        function startJourney() {
+            journeyStarted = true;
+            document.getElementById('start-journey').disabled = true;
+            document.getElementById('end-journey').disabled = false;
+            // Add your code to handle start of journey here
+        }
+
+        function endJourney() {
+            if (journeyStarted) {
+                // Add your code to handle end of journey here
+                alert("Congratulations! Your journey has been completed.");
+            }
+        }
+    </script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body onload="initMap()">
+    <h1>Route Finder</h1>
+    <form method="post" onsubmit="calculateRoute(); return false;">
+        <label for="origin">Origin:</label>
+        <input type="text" id="origin" name="origin" required>
+        <br>
+        <label for="destination">Destination:</label>
+        <input type="text" id="destination" name="destination" required>
+        <br>
+        <label for="travel-mode">Travel Mode:</label>
+        <select id="travel-mode" name="travel-mode">
+            <option value="BICYCLING">Cycling</option>
+            <option value="WALKING">Walking</option>
+        </select>
+        <br>
+        <input type="submit" value="Find Route">
+    </form>
+
+    <div id="map"></div>
+
+    <button id="start-journey" onclick="startJourney()">Start Journey</button>
+    <button id="end-journey" onclick="endJourney()" disabled>End Journey</button>
 </body>
 </html>

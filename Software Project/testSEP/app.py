@@ -5,6 +5,16 @@ app = Flask(__name__)
 
 gmaps = googlemaps.Client(key='AIzaSyC_IDAXXGAVJYlMrrRt6gpBDhumrkQ-CbY')
 
+# Sample database operations
+def start_journey(origin, destination):
+    # Perform database operations to store journey start data
+    pass
+
+def end_journey(destination, current_location):
+    # Perform database operations to store journey end data
+    pass
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -18,6 +28,22 @@ def index():
         return render_template('index.html', distance=distance, route=route)
 
     return render_template('index.html')
+
+@app.route('/end_journey', methods=['POST'])
+def end_journey():
+    destination = request.form['destination']
+    current_location = request.form['current_location']
+
+    # End the journey and update the database
+    end_journey(destination, current_location)
+
+    # Check if the current location matches the destination
+    if current_location == destination:
+        status = 'completed'
+    else:
+        status = 'incomplete'
+
+    return render_template('index.html', status=status)
 
 if __name__ == '__main__':
     app.run(debug=True)
