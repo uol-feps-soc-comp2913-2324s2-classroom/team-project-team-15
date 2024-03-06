@@ -1,0 +1,96 @@
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f7f7;
+    color: #333;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ff6600;
+    padding: 1vw;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#title {
+    color: #fff;
+    font-size: 2em;
+    margin-left: 4vw;
+    margin-right: auto;
+    padding-left: 4vw;
+}
+
+main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 2vw;
+    padding: 20px;
+}
+
+nav#navbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.nav-button {
+    display: inline-block;
+    background-color: #ffffff;
+    color: #000000;
+    text-decoration: none;
+    font-size: 1em; 
+    padding: 1vw 4.6vw;
+    margin: 0 1vw;
+    border-radius: 25px;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.3s;
+    border: 2.2px solid transparent;
+}
+
+.nav-button:hover {
+    background-color: #fff;
+    color: #ff6600;
+    cursor: pointer;
+    border-color: #5c5c5c;
+    transform: translateY(-5px);
+}
+
+
+@media (max-width: 768px) {
+    #title {
+        font-size: 1.5em; 
+    }
+    .nav-button {
+        padding: 0.8vw 2.5vw;
+        margin: 0 0.5vw;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+    }
+    #title {
+        margin: 0;
+        padding: 2vw 0;
+    }
+    nav#navbar {
+        justify-content: center;
+        padding: 2vw 0;
+    }
+    .nav-button {
+        font-size: 0.9em;
+    }
+}
+
+
+
+
