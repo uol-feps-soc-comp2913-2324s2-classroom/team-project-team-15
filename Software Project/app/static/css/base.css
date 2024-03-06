@@ -26,7 +26,6 @@ header {
     margin-right: auto;
     padding-left: 4vw;
 }
-
 main {
     display: flex;
     flex-wrap: wrap;
@@ -90,7 +89,5 @@ nav#navbar {
         font-size: 0.9em;
     }
 }
-
-
 
 
