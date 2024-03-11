@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        h1 {
+            color: #f9f9f9;
+        }
+
+        .profile-info {
+            margin-top: 20px;
+        }
+
+        .profile-info p {
+            margin: 5px 0;
+        }
+
+        .edit-button {
+            background-color: #ff8800;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Profile</h1>
+
+        <!-- Profile Icon -->
+        <img src="{{ url_for('static', filename='images/profile.png') }}" alt="Profile Icon" style="width: 100px; height: 100px;">
+
+
+        <!-- Profile Information -->
+        <div class="profile-info">
+            <p><strong>Username:</strong>Batty boi <button class="edit-button" onclick="editInfo('username')">Edit</button></p>
+            <p><strong>Name:</strong> slay girl <button class="edit-button" onclick="editInfo('name')">Edit</button></p>
+            <p><strong>Email:</strong> john.doe@example.com <button class="edit-button" onclick="editInfo('email')">Edit</button></p>
+        </div>
+    </div>
+</body>
+
+</html>

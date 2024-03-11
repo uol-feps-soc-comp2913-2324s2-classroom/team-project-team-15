@@ -5,8 +5,11 @@ from app.forms import RegistrationForm
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('home.html')
 
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])
