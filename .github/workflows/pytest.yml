@@ -17,6 +17,7 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install flask pytest
+        pip install flask_sqlalchemy
       working-directory: Software_Project  # Adjust this path to your project directory
 
     - name: Run tests
