@@ -21,4 +21,4 @@ jobs:
 
     - name: Run pytest
       run: |
-        pytest
+        pytest software_project/test/
