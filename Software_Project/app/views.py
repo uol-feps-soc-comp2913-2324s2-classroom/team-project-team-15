@@ -3,7 +3,8 @@ from app import app, db
 from app.models import User
 from app.forms import RegistrationForm
 from werkzeug.security import generate_password_hash
-
+from flask_login import login_user, logout_user, current_user, login_required
+from werkzeug.security import check_password_hash
 
 @app.route('/', methods=['GET'])
 def index():
@@ -33,3 +34,18 @@ def register():
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('index'))
     return render_template('register.html', title='Register', form=form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+
+        if user and check_password_hash(user.password_hash, password):
+            login_user(user)
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid username or password')
+    return render_template('login.html')
