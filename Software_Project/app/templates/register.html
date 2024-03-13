@@ -4,85 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Form</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        /* Optional custom styles */
-        .error-message {
-            color: red;
-        }
-    </style>
+    <title>Register</title>
 </head>
 
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Registration Form</h1>
-        <form method="POST" action="" class="col-md-6 mx-auto">
-            {{ form.hidden_tag() }}
-            <div class="form-group">
-                {{ form.username.label }}
-                {{ form.username(class="form-control") }}
-                {% for error in form.username.errors %}
-                <span class="error-message">{{ error }}</span>
-                {% endfor %}
-            </div>
-            <div class="form-group">
-                {{ form.firstName.label }}
-                {{ form.firstName(class="form-control") }}
-                {% for error in form.firstName.errors %}
-                <span class="error-message">{{ error }}</span>
-                {% endfor %}
-            </div>
-            <div class="form-group">
-                {{ form.surName.label }}
-                {{ form.surName(class="form-control") }}
-                {% for error in form.surName.errors %}
-                <span class="error-message">{{ error }}</span>
-                {% endfor %}
-            </div>
-            <div class="form-group">
-                {{ form.dob.label }}
-                {{ form.dob(class="form-control") }}
-                {% for error in form.dob.errors %}
-                <span class="error-message">{{ error }}</span>
-                {% endfor %}
-            </div>
-            <div class="form-group">
-                {{ form.email.label }}
-                {{ form.email(class="form-control") }}
-                {% for error in form.email.errors %}
-                <span class="error-message">{{ error }}</span>
-                {% endfor %}
-            </div>
-            <div class="form-group">
-                {{ form.phoneNumber.label }}
-                {{ form.phoneNumber(class="form-control") }}
-                {% for error in form.phoneNumber.errors %}
-                <span class="error-message">{{ error }}</span>
-                {% endfor %}
-            </div>
-            <div class="form-group">
-                {{ form.password.label }}
-                {{ form.password(class="form-control") }}
-                {% for error in form.password.errors %}
-                <span class="error-message">{{ error }}</span>
-                {% endfor %}
-            </div>
-            <div class="form-group">
-                {{ form.confirm_password.label }}
-                {{ form.confirm_password(class="form-control") }}
-                {% for error in form.confirm_password.errors %}
-                <span class="error-message">{{ error }}</span>
-                {% endfor %}
-            </div>
-            <button type="submit" class="btn btn-primary">{{ form.submit }}</button>
-        </form>
-    </div>
-    <!-- Bootstrap JS (optional) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <h2>Register</h2>
+    <form action="/register" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="username" placeholder="Username" required><br>
+        <input type="text" name="firstName" placeholder="First Name" required><br>
+        <input type="text" name="surName" placeholder="Surname" required><br>
+        <input type="date" name="dob" required><br>
+        <input type="email" name="email" placeholder="Email" required><br>
+        <input type="text" name="phoneNumber" placeholder="Phone Number" required><br>
+        <input type="password" name="password" placeholder="Password" required><br>
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required><br>
+        <button type="submit">Register</button>
+    </form>
 </body>
 
 </html>
