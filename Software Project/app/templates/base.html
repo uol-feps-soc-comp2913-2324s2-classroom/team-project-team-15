@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Running Web App</title>
+    <title>{% block title %}Running Web App{% endblock %}</title>
     <link rel="stylesheet" href="base.css">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -15,21 +15,8 @@
             <a href="#" class="nav-button">Nav 2</a>
         </nav>
     </header>
-        <main>
-            <div id="login-box">
-                <div id="login-options">
-                    <button class="login-option-button" onclick="selectLoginType('user')">User Login</button>
-                    <button class="login-option-button" onclick="selectLoginType('employee')">Employee Login</button>
-                </div>
-                <form id="login-form">
-                    <input type="text" placeholder="Username" id="username" required>
-                    <input type="password" placeholder="Password" id="password" required>
-                    <button type="submit" id="login-button">Login</button>
-                </form>
-                <button id="register-button">Register</button>
-            </div>
-        </main>
-    <footer>
-    </footer>
+    
+    <main>
+    </main>
 </body>
 </html>
