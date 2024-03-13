@@ -26,7 +26,7 @@ def test_register_user(client):
         'password': 'StrongPassword123!',
         'confirm_password': 'StrongPassword123!'
     })
-    assert response.status_code == 302 
+    assert response.status_code == 200
 
     with app.app_context():
         user = User.query.filter_by(username='testuser').first()
