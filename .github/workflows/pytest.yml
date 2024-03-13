@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v2  # This checks out your repository
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -16,8 +16,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest
+      working-directory: team-project-team-15/software_project
 
     - name: Run pytest
-      working-directory: software_project
       run: |
         pytest test/
+      working-directory: team-project-team-15/software_project
