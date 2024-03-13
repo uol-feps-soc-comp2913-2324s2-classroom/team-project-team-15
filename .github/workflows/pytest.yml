@@ -1,24 +1,25 @@
 name: pytest
-
 on: [push, pull_request]
-
 jobs:
-  test:
+  build:
+
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python
+    - name: Set up Python 3.x
       uses: actions/setup-python@v2
       with:
-        python-version: 3.x
+        python-version: '3.x'
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install pytest
+        pip install --upgrade pip
+        pip install -r requirements.txt
+      working-directory: Software_Project  # Adjust this path to your project directory
 
-    - name: Run pytest
+    - name: Run tests
       run: |
         pytest
+      working-directory: Software_Project
