@@ -1,0 +1,146 @@
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Lato', sans-serif; 
+    margin: 0;
+    padding: 0;
+    background-color: #f7f7f7; 
+    color: #333; 
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ff6600;
+    padding: 1vw; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#title {
+    color: #fff;
+    font-size: 2em;
+    margin-left: 4vw;
+    margin-right: auto;
+    padding-left: 4vw; 
+}
+
+#anchor-container {
+    position: absolute; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    display: flex;
+    
+}
+
+.anchor {
+    width: 3vw; 
+    height: 3vw; 
+    background-color: #e65c00;
+    margin: 0 1vw; 
+    border: none; 
+    border-radius: 4px; 
+    transition: transform 0.3s;
+}
+
+.anchor:hover {
+    transform: scale(1.1);
+    background-color: #cc5500; 
+}
+
+#navigation-container {
+    display: flex;
+    justify-content: flex-end; 
+    width: 30vw; 
+}
+
+.navigation-button {
+    background-color: #ff6600;
+    border: none;
+    color: white;
+    padding: 1vw 2vw; 
+    margin-left: 2vw; 
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    border-radius: 4px;
+}
+
+.navigation-button:hover {
+    background-color: #e65c00; 
+    transform: translateY(-2px); 
+}
+
+#subheading {
+    text-align: center;
+    padding: 10px;
+    color: #333;
+    background-color: #f7f7f7;
+    font-size: 1.5em;
+}
+
+main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 2vw; 
+    padding: 20px;
+}
+
+#map-container {
+    width: 50vw; 
+    height: 30vh; 
+    overflow: hidden;
+    position: relative;
+    flex: 1 1 25vw; 
+    margin: 1vw;
+    
+}
+
+#map-image {
+    width: 100%;
+    height: 100%; 
+    display: block;
+    object-fit: contain; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#image-container {
+    flex: 1 1 45vw; 
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    grid-gap: 1vw; 
+    margin: 1vw; 
+}
+
+.content-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover; 
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #333;
+}
+
+#n-button {
+    background-color: #ff6600;
+   
+    color: white;
+    padding: 10px 50px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+    border-radius: 4px;
+}
+
+#n-button:hover {
+    background-color: #e65c00; 
+    border-color: #ccc; 
+}
+

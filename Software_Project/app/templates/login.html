@@ -1,35 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-</head>
+{% block title %}
+Login
+{% endblock %}
 
-<body>
-    <form class="loginForm" action="{{url_for('login')}}" method="POST">
+{% block body %}
+<div id="login-box">
+    <div id="login-options">
+        <button class="login-option-button" onclick="selectLoginType('user')">User Login</button>
+        <button class="login-option-button" onclick="selectLoginType('employee')">Employee Login</button>
+    </div>
+    <form id="login-form" action="{{ url_for('login') }}" method="POST" style="display: block;">
         <h2>Login Form</h2>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-
-        <button type="submit">Login</button>
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <label for="username" style="margin-right: 10px;">Username:</label>
+            <input type="text" placeholder="Username" id="username" name="username" required>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <label for="password" style="margin-right: 10px;">Password:</label>
+            <input type="password" placeholder="Password" id="password" name="password" required>
+        </div>
+        <button type="submit" id="login-button">Login</button>
     </form>
+    <a href="{{ url_for('register') }}" id="register-button" class="button">Register</a>
+</div>
 
-    <!-- Flash messages section -->
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul class="flashed-messages">
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
-</body>
-
-</html>
+<!-- Flash messages section -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="flashed-messages">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% endblock %}

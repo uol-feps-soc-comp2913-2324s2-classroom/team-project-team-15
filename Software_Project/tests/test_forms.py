@@ -10,9 +10,13 @@ def client():
     client = app.test_client()
 
     with app.app_context():
-        db.create_all()
+        db.session.begin_nested()  # Start a nested transaction if supported
 
     yield client
+
+    # Teardown after test
+    with app.app_context():
+        db.session.rollback()
 
 
 def test_register_user(client):
@@ -52,3 +56,34 @@ def test_login_unsuccessful(client):
     
     assert login_response.status_code == 200
     assert b'Invalid username or password' in login_response.data
+
+def test_choose_subscription(client):
+    # Assuming a user "testuser" exists; otherwise, create one first.
+    client.post('/register', data={
+        'username': 'testuser2',
+        'firstName': 'Test2',
+        'surName': 'User2',
+        'dob': '1990-01-02',
+        'email': 'test2@example.com',
+        'phoneNumber': '0987654321',
+        'password': 'StrongPassword123!',
+        'confirm_password': 'StrongPassword123!'
+    })
+
+    # Log in as the user before choosing a subscription
+    client.post('/login', data={
+        'username': 'testuser2',
+        'password': 'StrongPassword123!',
+    }, follow_redirects=True)
+
+    # Choose a subscription plan
+    response = client.post('/choose_subscription', data={
+        'subscription_plan': 'monthly',
+    }, follow_redirects=True)
+
+    assert response.status_code == 200  # Or 302 if it redirects to another page
+    
+    # Verify the subscription plan was set correctly
+    with app.app_context():
+        user = User.query.filter_by(username='testuser2').first()
+        assert user.subscription_plan_id is not None

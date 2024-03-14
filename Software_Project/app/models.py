@@ -2,7 +2,6 @@ from app import db
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
 
 
 friends = db.Table('friends',
@@ -44,6 +43,7 @@ class Journey(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
 class SubscriptionPlan(db.Model):
+    __tablename__ = 'subscription_plan'
     id = db.Column(db.Integer, primary_key=True)
     plan_name = db.Column(db.String(50), nullable=False)
     price = db.Column(db.Float, nullable=False)

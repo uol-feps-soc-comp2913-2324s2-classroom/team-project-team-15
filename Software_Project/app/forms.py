@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, DateField, SubmitField, StringField
+from wtforms import PasswordField, DateField, SubmitField, StringField, RadioField
 from wtforms.validators import DataRequired, EqualTo, InputRequired, Length, Regexp, Email, ValidationError
 from app.models import User
 
@@ -46,3 +46,11 @@ class RegistrationForm(FlaskForm):
     def validate_confirm_password(self, confirm_password):
         if self.password.data != confirm_password.data:
             raise ValidationError('Passwords do not match.')
+
+class SubscriptionForm(FlaskForm):
+    subscription_plan = RadioField('Subscription Plan', choices=[
+        ('weekly', 'Weekly - £2.99'),
+        ('monthly', 'Monthly - £12.99'),
+        ('annually', 'Annually - £99.99')
+    ], validators=[DataRequired()])
+    submit = SubmitField('Choose Plan')
