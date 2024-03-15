@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+    <div id="login-box">
+        <div id="login-options">
+            <button class="login-option-button" onclick="selectLoginType('user')">User Login</button>
+            <button class="login-option-button" onclick="selectLoginType('employee')">Employee Login</button>
+        </div>
+        <form id="login-form">
+            <input type="text" placeholder="Username" id="username" required>
+            <input type="password" placeholder="Password" id="password" required>
+            <button type="submit" id="login-button">Login</button>
+        </form>
+        <button id="register-button">Register</button>
+    </div>
+{% endblock %}
