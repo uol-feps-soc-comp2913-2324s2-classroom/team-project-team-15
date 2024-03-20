@@ -1,22 +1,19 @@
+from flask import render_template, redirect, url_for, flash, request
 from app import app, db
-from flask import render_template, redirect, url_for, flash
 from app.models import User
 from app.forms import RegistrationForm
+from werkzeug.security import generate_password_hash
 
-@app.route('/')
+
+@app.route('/', methods=['GET'])
 def index():
-    return render_template('home.html')
-
-@app.route('/profile')
-def profile():
-    return render_template('profile.html')
-
+    return render_template('index.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        # Creating a user object with the form data
+    form = RegistrationForm(request.form)
+    if request.method == 'POST' and form.validate():
+        hashed_password = generate_password_hash(form.password.data, method='pbkdf2:sha256')
         user = User(
             username=form.username.data,
             firstname=form.firstName.data,
@@ -24,21 +21,15 @@ def register():
             dob=form.dob.data,
             email=form.email.data,
             phone_number=form.phoneNumber.data,
-            password=form.password.data
+            password_hash=hashed_password,
         )
+        # Set default values
+        user.journeys = []
+        user.friends = [] 
+        user.subscription_plan_id = None 
         
-        # Adding the user to the database
         db.session.add(user)
         db.session.commit()
-
-        # Flashing a success message
-        flash('Registration successful! You can now log in.', 'success')
-        
-        # Redirecting to the index page
+        flash('Congratulations, you are now a registered user!')
         return redirect(url_for('index'))
-
-    # Rendering the registration form template
-    return render_template('register.html', form=form)
-
-   
-    
+    return render_template('register.html', title='Register', form=form)
