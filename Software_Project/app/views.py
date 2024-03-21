@@ -9,6 +9,10 @@ from werkzeug.security import generate_password_hash
 def index():
     return render_template('index.html')
 
+@app.route('/friends', methods=['GET'])
+def friends():
+    return render_template('friends.html')
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm(request.form)
