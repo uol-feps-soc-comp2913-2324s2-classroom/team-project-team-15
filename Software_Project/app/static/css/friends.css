@@ -1,7 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #FFA500; /* Orange background from your file */
-    color: white;
+    color: white;  /* This color is for body text only */
 }
 
 .container {
@@ -44,7 +44,7 @@ h1 {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 1px 1px 2px 0 #CCCCCC; /* Added from your file */
 }
 
 .friend-details {
@@ -63,4 +63,10 @@ h1 {
 
 .remove-btn:hover {
     background-color: #FF6347; /* Lighter shade of red-orange on hover from your file */
+}
+
+/* New rule to target "name" and "username" elements */
+.friend-details h2,
+.friend-details p {
+    color: black;  /* This will override the white color from the body rule */
 }
