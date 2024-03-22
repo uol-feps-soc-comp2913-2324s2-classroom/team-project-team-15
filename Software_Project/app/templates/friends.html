@@ -1,14 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends</title>
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/friends.css')}}">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/friends.css')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block body %}
     <div class="container">
-        <h1>Friends</h1>
+        <h2>Friends</h2>
         <div class="search-bar">
             <input type="text" placeholder="Search...">
             <select>
@@ -17,22 +17,83 @@
                 <option value="offline">Offline</option>
             </select>
         </div>
-        <div class="friends-list">
-            <div class="friend-box">
-                <div class="friend-details">
-                    <h2>Name: </h2>
-                    <p>Username:</p>
+        <div class="friends-list row">
+            <div class="friend-box col-md-4">
+                <div class="big-box">
+                    <div class="img">
+                        <img src="https://bootdey.com/img/Content/avatar/avatar1.png" class="img-responsive rounded-circle" alt>
+                    </div>
+                    <div class="details">
+                        <div class="name">
+                            <a href="#">Emily Jones</a>
+                        </div>
+                        <div class="time online">
+                            <i class="fa fa-check-circle"></i> Online
+                        </div>
+                        <div class="type">
+                            <span class="label label-warning">Pending</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-default remove-btn">Remove</button>
                 </div>
-                <button class="remove-btn">Remove</button>
             </div>
-            <div class="friend-box">
-                <div class="friend-details">
-                    <h2>Name:</h2>
-                    <p>Username:</p>
+            <div class="friend-box col-md-4">
+                <div class="big-box">
+                    <div class="img">
+                        <img src="https://bootdey.com/img/Content/avatar/avatar2.png" class="img-responsive rounded-circle" alt>
+                    </div>
+                    <div class="details">
+                        <div class="name">
+                            <a href="#">William Smith</a>
+                        </div>
+                        <div class="time online">
+                            <i class="fa fa-check-circle"></i> Online
+                        </div>
+                        <div class="type">
+                            <span class="label label-warning">Pending</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-default remove-btn">Remove</button>
                 </div>
-                <button class="remove-btn">Remove</button>
             </div>
+            <div class="friend-box col-md-4">
+                <div class="big-box">
+                    <div class="img">
+                        <img src="https://bootdey.com/img/Content/avatar/avatar3.png" class="img-responsive rounded-circle" alt>
+                    </div>
+                    <div class="details">
+                        <div class="name">
+                            <a href="#">Olivia Brown</a>
+                        </div>
+                        <div class="time online">
+                            <i class="fa fa-check-circle"></i> Online
+                        </div>
+                        <div class="type">
+                            <span class="label label-warning">Pending</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-default remove-btn">Remove</button>
+                </div>
             </div>
+            <div class="friend-box col-md-4">
+                <div class="big-box">
+                    <div class="img">
+                        <img src="https://bootdey.com/img/Content/avatar/avatar4.png" class="img-responsive rounded-circle" alt>
+                    </div>
+                    <div class="details">
+                        <div class="name">
+                            <a href="#">Noah Miller</a>
+                        </div>
+                        <div class="time online">
+                            <i class="fa fa-check-circle"></i> Online
+                        </div>
+                        <div class="type">
+                            <span class="label label-warning">Pending</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-default remove-btn">Remove</button>
+                </div>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+{% endblock %}
