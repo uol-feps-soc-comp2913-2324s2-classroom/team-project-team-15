@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Friends</title>
-    <link rel="stylesheet" href="friends.css">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/friends.css')}}">
 </head>
 <body>
     <div class="container">
-        <h1>Friends Page</h1>
+        <h1>Friends</h1>
         <div class="search-bar">
             <input type="text" placeholder="Search...">
             <select>
@@ -20,15 +20,15 @@
         <div class="friends-list">
             <div class="friend-box">
                 <div class="friend-details">
-                    <h2>Name: John</h2>
-                    <p>Username: johndoe1</p>
+                    <h2>Name: </h2>
+                    <p>Username:</p>
                 </div>
                 <button class="remove-btn">Remove</button>
             </div>
             <div class="friend-box">
                 <div class="friend-details">
-                    <h2>Name: </h2>
-                    <p>Username: </p>
+                    <h2>Name:</h2>
+                    <p>Username:</p>
                 </div>
                 <button class="remove-btn">Remove</button>
             </div>
