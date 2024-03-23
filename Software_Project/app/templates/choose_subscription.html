@@ -5,34 +5,29 @@ Subscription
 {% endblock %}
 
 {% block body %}
-<div class="subscription-container">
-    <h1>Choose your subscription plan</h1>
-    <div class="plan" id="weekly">
-        <form action="{{ url_for('choose_subscription') }}" method="POST">
-            {{ form.hidden_tag() }}
-            <h2>Weekly</h2>
-            <p class="price">£2.99</p>
-            <input type="hidden" name="subscription_plan" value="weekly">
-            <button type="submit" name="submit" value="weekly">CHOOSE WEEKLY PLAN</button>
-        </form>
-    </div>
-    <div class="plan" id="monthly">
-        <form action="{{ url_for('choose_subscription') }}" method="POST">
-            {{ form.hidden_tag() }}
-            <h2>Monthly</h2>
-            <p class="price">£12.99</p>
-            <input type="hidden" name="subscription_plan" value="monthly">
-            <button type="submit" name="submit" value="monthly">CHOOSE MONTHLY PLAN</button>
-        </form>
-    </div>
-    <div class="plan" id="annually">
-        <form action="{{ url_for('choose_subscription') }}" method="POST">
-            {{ form.hidden_tag() }}
-            <h2>Annually</h2>
-            <p class="price">£99.99</p>
-            <input type="hidden" name="subscription_plan" value="annually">
-            <button type="submit" name="submit" value="annually">CHOOSE ANNUALLY PLAN</button>
-        </form>
-    </div>
+
+<a href="{{ url_for('logout') }}">Logout</a>
+{% for plan in plans %}
+<div class="plan" id="{{ plan.id }}">
+    <form action="{{ url_for('create_checkout_session') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <h2>{{ plan.name }}</h2>
+        <p class="price">{{ plan.amount }} {{ plan.currency }}</p>
+        <input type="hidden" name="stripe_price_id" value="{{ plan.id }}">
+        <button type="submit">Choose {{ plan.name }}</button>
+    </form>
 </div>
+{% endfor %}
+<!-- Flash messages section -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="flashed-messages">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+
 {% endblock %}

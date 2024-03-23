@@ -47,10 +47,7 @@ class RegistrationForm(FlaskForm):
         if self.password.data != confirm_password.data:
             raise ValidationError('Passwords do not match.')
 
-class SubscriptionForm(FlaskForm):
-    subscription_plan = RadioField('Subscription Plan', choices=[
-        ('weekly', 'Weekly - £2.99'),
-        ('monthly', 'Monthly - £12.99'),
-        ('annually', 'Annually - £99.99')
-    ], validators=[DataRequired()])
-    submit = SubmitField('Choose Plan')
+
+class CSRFProtectForm(FlaskForm):
+    """A simple form just for CSRF protection."""
+    pass    

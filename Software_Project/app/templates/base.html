@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static',filename='css/base.css')}}">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_IDAXXGAVJYlMrrRt6gpBDhumrkQ-CbY"></script>
     {% block head %}{% endblock %}
 </head>
 
@@ -17,6 +19,8 @@
             <a href="#" class="nav-button">Nav 2</a>
         </nav>
     </header>
+    <script src="{{ url_for('static',filename='javascript/script.js')}}"></script>
+
     {% block body %} {% endblock %}
 </body>
 

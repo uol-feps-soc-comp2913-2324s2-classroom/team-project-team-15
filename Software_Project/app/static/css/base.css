@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 html {
     scroll-behavior: smooth;
 }
@@ -318,4 +320,251 @@ nav#navbar {
     content: "";
     display: table;
     clear: both;
+}
+
+
+
+#map-container {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#map {
+    height: 400px;
+    width: 100%;
+}
+
+
+.journey-buttons {
+    margin-top: 20px;
+}
+
+.journey-buttons button:disabled {
+    background-color: #ccc;
+    /* Grey color */
+    cursor: not-allowed;
+    /* Change cursor to not-allowed */
+}
+
+
+.search-bar {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.search-bar select {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: white;
+}
+
+.friends-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.friend-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.friend-details {
+    margin-bottom: 10px;
+}
+
+.remove-btn {
+    background-color: #FF4500;
+    /* Red-orange from your file */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.remove-btn:hover {
+    background-color: #FF6347;
+    /* Lighter shade of red-orange on hover from your file */
+}
+
+.card {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    height: 35vh;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 35px 80px rgb(0, 0, 0, 0.15);
+    transition: 0.5s;
+    margin: 2vh auto;
+}
+
+.card:hover {
+    height: 70vh;
+}
+
+.imgBx {
+    position: absolute;
+    left: 50%;
+    top: -1vh;
+    transform: translateX(-50%);
+    overflow: hidden;
+    transition: transform 0.5s ease, opacity 0.5s ease, width 0.5s ease, height 0.5s ease;
+    /* Smooth transitions for multiple properties */
+    border-radius: 20px;
+    width: 10vw;
+    height: 10vw;
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.35);
+}
+
+.imgBx img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+    transition: width 0.5s ease, height 0.5s ease;
+    /* Smooth transition for size changes */
+}
+
+.card:hover .imgBx {
+    height: 8vw;
+    width: 8vw;
+}
+
+.card:hover .imgBx img {
+    transition-delay: 0.5s;
+}
+
+.card .content {
+    position: absolute;
+    top: 40px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    overflow: hidden;
+    padding: 40px;
+}
+
+.card .content .details {
+    padding: 1vw;
+    text-align: center;
+    width: 100%;
+    transition: 0.5s;
+    transform: translateY(150px);
+}
+
+.card:hover .content .details {
+    transform: translateY(0px);
+}
+
+.card .content .details h2 {
+    font-size: 1.25em;
+    font-weight: 600;
+    color: #555;
+    line-height: 1.2em;
+    margin-bottom: 30px;
+}
+
+.card .content .details h2 span {
+    font-size: 0.75em;
+    font-weight: 500;
+    opacity: 0.5;
+}
+
+.card .content .details .data {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 20px 0;
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.5s, opacity 0.5s;
+}
+
+.card:hover .content .details .data {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.card .content .details .data h3 {
+    font-size: 1em;
+    color: #555;
+    line-height: 1.2em;
+    font-weight: 600;
+
+}
+
+.card .content .details .data h3 span {
+    font-size: 0.85em;
+    font-weight: 400;
+    opacity: 0.5;
+}
+
+.card .content .details .actionBtn {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 20px;
+
+}
+
+.card .content .details .actionBtn button {
+    padding: 10px 30px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    font-weight: 500;
+    background: #fc6107;
+    color: #fff;
+    cursor: pointer
+}
+
+
+.mapBx {
+    overflow: hidden;
+    transition: 0.5s;
+    width: 80%;
+    height: 0;
+    /* Start with height 0 to make the map not visible initially */
+    margin: 0 auto 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 30px;
+}
+
+.mapBx img {
+    max-width: 100%;
+    height: 0;
+    /* Set to 0 so it takes no space */
+    object-fit: contain;
+    transition: height 0.5s ease;
+    /* Smooth transition for height change */
+    border-radius: 20px;
+}
+
+/* On hover, change the height of the .mapBx and its image to make it visible */
+.card:hover .mapBx {
+    height: 25vh;
+    /* Set a fixed height on hover */
+}
+
+.card:hover .mapBx img {
+    height: 100%;
+    /* The image expands to the height of its container */
 }
