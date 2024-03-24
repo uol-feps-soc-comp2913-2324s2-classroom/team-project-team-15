@@ -26,7 +26,6 @@ def client():
 
 
 
-
 def test_register_user(client):
     # Simulate form submission
     response = client.post('/register', data={
