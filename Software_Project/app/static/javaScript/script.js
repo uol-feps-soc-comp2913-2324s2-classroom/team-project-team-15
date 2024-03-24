@@ -105,41 +105,57 @@ function addWaypoint() {
     waypointsContainer.appendChild(newWaypointInput);
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const startBtn = document.getElementById('start-journey');
-    const endBtn = document.getElementById('end-journey');
-
-    startBtn.onclick = function () {
-        const startLocation = document.getElementById('start-location').value;
-        const userId = 1; // Example user ID, replace with dynamic data from your app
-
-        fetch('/api/journeys', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: userId, start_location: startLocation })
+function startJourney() {
+    fetch('/api/journeys/start', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // Add your authentication headers here (if required)
+        },
+        body: JSON.stringify({
+            // Include any necessary data for starting a journey
+        }),
+        credentials: 'include' // For sessions to work properly across requests
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentJourneyId = data.journey_id; // Store journey ID for later use
+                console.log("Journey started successfully. Journey ID:", currentJourneyId);
+                // Update UI or state as needed
+            } else {
+                console.error("Failed to start journey");
+            }
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.message);
-                sessionStorage.setItem('currentJourneyId', data.journey_id);
-                endBtn.disabled = false;
-            });
-    };
+        .catch(error => console.error('Error starting journey:', error));
+}
 
-    endBtn.onclick = function () {
-        const currentJourneyId = sessionStorage.getItem('currentJourneyId');
-        const endLocation = document.getElementById('end-location').value;
+function endJourney() {
+    if (!currentJourneyId) {
+        console.error("No active journey to end.");
+        return;
+    }
 
-        fetch(`/api/journeys/${currentJourneyId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ end_location: endLocation })
+    fetch(`/api/journeys/end/${currentJourneyId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // Add your authentication headers here (if required)
+        },
+        body: JSON.stringify({
+            // Include any necessary data for ending a journey
+        }),
+        credentials: 'include' // For sessions to work properly across requests
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("Journey ended successfully.");
+                currentJourneyId = null; // Clear the stored journey ID
+                // Update UI or state as needed
+            } else {
+                console.error("Failed to end journey");
+            }
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.message);
-                sessionStorage.removeItem('currentJourneyId');
-                endBtn.disabled = true;
-            });
-    };
-});
+        .catch(error => console.error('Error ending journey:', error));
+}

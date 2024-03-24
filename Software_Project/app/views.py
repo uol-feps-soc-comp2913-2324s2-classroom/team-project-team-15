@@ -1,13 +1,14 @@
 import json
 from flask import render_template, redirect, url_for, flash, request,session,jsonify
 from app import app, db
-from app.models import SubscriptionPlan, User,Payment, Journey
+from app.models import SubscriptionPlan, User,Payment, Journey, JourneyRecord
 from app.forms import RegistrationForm
 from .forms import CSRFProtectForm
 from werkzeug.security import generate_password_hash
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 import stripe
+import logging
 from datetime import datetime, timedelta
 stripe.api_key = 'sk_test_51OubkTGiwWWmEjuUTmrjuRowLjdmFXb365kmtoD0YRLYf7rYKIVhFBIEwn3ozE4O1TMSIqcHa9WIk07RcbIqfErC00DyV65frs'
 
@@ -200,40 +201,12 @@ def payment_success():
     return redirect(url_for('index'))
 
 
-
-
 @app.route('/payment_cancel',methods=['GET'])
 @login_required
 def payment_cancel():
     # Inform the user that their payment was canceled
     flash('Payment was canceled.', 'warning')
     return redirect(url_for('index'))
-
-
-############################################################################################
-
-
-@app.route('/api/journeys', methods=['POST'])
-def start_journey():
-    data = request.json
-    new_journey = Journey(user_id=data['user_id'], start_location=data['start_location'])
-    db.session.add(new_journey)
-    db.session.commit()
-    return jsonify({"message": "Journey started", "journey_id": new_journey.id}), 201
-
-@app.route('/api/journeys/<int:journey_id>', methods=['PATCH'])
-def end_journey(journey_id):
-    data = request.json
-    journey = Journey.query.get_or_404(journey_id)
-    journey.end_location = data.get('end_location', journey.end_location)
-    journey.end_time = datetime.utcnow()
-    db.session.commit()
-    return jsonify({"message": "Journey ended"}), 200
-
-@app.route('/gps', methods=['GET'])
-@login_required
-def gps_page():
-    return render_template('index.html')
 
 
 @app.route('/friends', methods=['GET', 'POST'])
@@ -245,3 +218,24 @@ def friends():
 @login_required
 def friendsProfile():
     return render_template('friendsprofile.html')
+
+@app.route('/add-journey', methods=['POST'])
+def add_journey():
+    data = request.json
+    if not data:
+        app.logger.error('No JSON data received')
+        return jsonify({'message': 'No data received'}), 400
+    app.logger.info('Received data: %s', data)
+    new_journey = JourneyRecord(user_id=current_user.id,origin=data['origin'], destination=data['destination'],
+                          waypoints=data['waypoints'], time_taken=data['time_taken'])
+    db.session.add(new_journey)
+    db.session.commit()
+    return jsonify({'message': 'Journey added successfully'}),200
+
+
+@app.route('/gps', methods=['GET'])
+@login_required
+def gps_page():
+    # Fetch all journeys for the current user to display
+    journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
+    return render_template('index.html', journeys=journeys)
