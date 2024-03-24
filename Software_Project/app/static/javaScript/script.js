@@ -65,7 +65,8 @@ function SignUp(){
     const closeFormButton1 = document.getElementById("closeForm1");
 
     form1.style.display = "block";
-    
+    overlay1.style.display = "block";
+
 }
 
 function calculateRoute() {
