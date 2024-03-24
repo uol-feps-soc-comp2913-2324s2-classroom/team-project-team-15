@@ -64,6 +64,7 @@ function SignUp(){
     const overlay1 = document.getElementById("overlay1");
     const closeFormButton1 = document.getElementById("closeForm1");
 
+    form1.style.display = "block";
     
 }
 
