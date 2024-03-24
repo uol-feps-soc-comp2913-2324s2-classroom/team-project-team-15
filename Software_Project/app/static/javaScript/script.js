@@ -49,6 +49,7 @@ function SubBox(){
     const overlay1 = document.getElementById("overlay1");
     const closeFormButton2 = document.getElementById("closeForm2");
     form1.style.display = "none";
+    form2.style.display = "block";
     
 }
 
