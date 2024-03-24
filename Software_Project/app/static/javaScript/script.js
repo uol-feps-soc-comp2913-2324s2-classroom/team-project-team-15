@@ -60,6 +60,7 @@ function SubBox(){
 }
 
 function SignUp(){
+    const form1 = document.getElementById("popupForm1");
     
 }
 
