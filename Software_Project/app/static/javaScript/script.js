@@ -46,6 +46,7 @@ function initMap() {
 function SubBox(){
     const form1 = document.getElementById("popupForm1");
     const form2 = document.getElementById("popupForm2");
+    const overlay1 = document.getElementById("overlay1");
     
 }
 
