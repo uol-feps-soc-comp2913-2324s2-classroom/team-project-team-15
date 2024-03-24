@@ -59,6 +59,10 @@ function SubBox(){
     });
 }
 
+function SignUp(){
+    
+}
+
 function calculateRoute() {
     var origin = document.getElementById('origin').value;
     var destination = document.getElementById('destination').value;
