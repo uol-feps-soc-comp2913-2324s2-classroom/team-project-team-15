@@ -50,7 +50,13 @@ function SubBox(){
     const closeFormButton2 = document.getElementById("closeForm2");
     form1.style.display = "none";
     form2.style.display = "block";
-    
+
+
+    // If close button is clicked, the form, overlay should disappear
+    closeFormButton2.addEventListener("click", function () {
+        form2.style.display = "none";
+        overlay1.style.display = "none";
+    });
 }
 
 function calculateRoute() {
