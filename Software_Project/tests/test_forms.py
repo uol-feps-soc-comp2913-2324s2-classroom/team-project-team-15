@@ -1,6 +1,7 @@
 import pytest
 from app import app, db
 from app.models import User
+from werkzeug.security import check_password_hash
 
 @pytest.fixture
 def client():
@@ -13,4 +14,41 @@ def client():
         db.create_all()
 
     yield client
+
+def test_register_user(client):
+    # Simulate form submission
+    response = client.post('/register', data={
+        'username': 'testuser',
+        'firstName': 'Test',
+        'surName': 'User',
+        'dob': '1990-01-01',
+        'email': 'test@example.com',
+        'phoneNumber': '1234567890',
+        'password': 'StrongPassword123!',
+        'confirm_password': 'StrongPassword123!'
+    }, follow_redirects=True)
+
+    # Check for successful registration response
+    assert response.status_code == 200
+    assert b'Congratulations, you are now a registered user!' in response.data
+
+
+def test_login_successful(client):
+    # Attempt to log in with the correct credentials
+    login_response = client.post('/login', data={
+        'username': 'testuser',
+        'password': 'StrongPassword123!',
+    }, follow_redirects=True)
+    
+    assert login_response.status_code == 200
+
+def test_login_unsuccessful(client):
+    # Attempt to log in with incorrect credentials
+    login_response = client.post('/login', data={
+        'username': 'testuser',
+        'password': 'WrongPassword!',
+    }, follow_redirects=True)
+    
+    assert login_response.status_code == 200
+    assert b'Invalid username or password' in login_response.data
 

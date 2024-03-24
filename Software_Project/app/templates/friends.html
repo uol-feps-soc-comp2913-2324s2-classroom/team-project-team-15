@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends</title>
-    <link rel="stylesheet" href="friends.css">
-</head>
+{% extends "base.html" %}
+
+{% block title %}
+Friends
+{% endblock %}
+
+{% block body %}
+
 <body>
     <div class="container">
         <h1>My Romantic Friends</h1>
@@ -32,7 +32,8 @@
                 </div>
                 <button class="remove-btn">Remove</button>
             </div>
-            </div>
+        </div>
     </div>
 </body>
-</html>
+{% endblock %}
+
