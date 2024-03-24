@@ -69,6 +69,15 @@
                 <button type="submit" name="submit" value="monthly">Choose</button>
             </form>
         </div>
+        <div class="plan" id="annually">
+            <form action="{{ url_for('choose_subscription') }}" method="POST">
+                <h2>Annually</h2>
+                <p class="price">£99.99</p>
+                <p class="description"§>(Excl. VAT)</p>
+                <input type="hidden" name="subscription_plan" value="annually">
+                <button type="submit" name="submit" value="annually">Choose</button>
+            </form>
+        </div>
 
     </div>
 
