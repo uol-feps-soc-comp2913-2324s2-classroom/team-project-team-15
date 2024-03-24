@@ -62,6 +62,8 @@ function SubBox(){
 function SignUp(){
     const form1 = document.getElementById("popupForm1");
     const overlay1 = document.getElementById("overlay1");
+    const closeFormButton1 = document.getElementById("closeForm1");
+
     
 }
 
