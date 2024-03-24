@@ -43,6 +43,11 @@ function initMap() {
     }
 }
 
+function SubBox(){
+    const form1 = document.getElementById("popupForm1");
+  
+}
+
 function calculateRoute() {
     var origin = document.getElementById('origin').value;
     var destination = document.getElementById('destination').value;
