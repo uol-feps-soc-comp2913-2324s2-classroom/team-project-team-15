@@ -1,28 +1,55 @@
 import pytest
 from app import app, db
-from app.models import User, SubscriptionPlan
+from app.models import User
+from werkzeug.security import check_password_hash
 
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    test_client = app.test_client()
+    client = app.test_client()
 
     with app.app_context():
-        db.create_all()  # Create database schema including SubscriptionPlan table
+        db.create_all()
 
-        # Create test subscription plans
-        db.session.add(SubscriptionPlan(plan_name='monthly', price=12.99, duration='1 month'))
-        db.session.add(SubscriptionPlan(plan_name='annually', price=99.99, duration='12 months'))
-        db.session.commit()
+    yield client
 
-        db.session.begin_nested()  # Start a nested transaction
 
-    yield test_client
+def test_register_user(client):
+    # Simulate form submission
+    response = client.post('/register', data={
+        'username': 'testuser',
+        'firstName': 'Test',
+        'surName': 'User',
+        'dob': '1990-01-01',
+        'email': 'test@example.com',
+        'phoneNumber': '1234567890',
+        'password': 'StrongPassword123!',
+        'confirm_password': 'StrongPassword123!'
+    }, follow_redirects=True)
 
-    # Teardown after test
-    with app.app_context():
-        db.session.rollback()
-        db.session.close()
+    # Check for successful registration response
+    assert response.status_code == 200
+    assert b'Congratulations, you are now a registered user!' in response.data
+
+
+def test_login_successful(client):
+    # Attempt to log in with the correct credentials
+    login_response = client.post('/login', data={
+        'username': 'testuser',
+        'password': 'StrongPassword123!',
+    }, follow_redirects=True)
+    
+    assert login_response.status_code == 200
+
+def test_login_unsuccessful(client):
+    # Attempt to log in with incorrect credentials
+    login_response = client.post('/login', data={
+        'username': 'testuser',
+        'password': 'WrongPassword!',
+    }, follow_redirects=True)
+    
+    assert login_response.status_code == 200
+    assert b'Invalid username or password' in login_response.data
 
