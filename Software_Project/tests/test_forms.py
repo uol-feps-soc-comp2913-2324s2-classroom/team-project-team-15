@@ -3,6 +3,13 @@ from app import app, db
 from app.models import User
 from werkzeug.security import check_password_hash
 
+def delete_test_data():
+    with app.app_context():
+        # Delete the user created during the tests
+        User.query.filter(User.email == 'test@example.com').delete()
+        # Commit the changes to the database
+        db.session.commit()
+
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
@@ -14,6 +21,10 @@ def client():
         db.create_all()
 
     yield client
+     # After the test runs, clean up the test data
+    delete_test_data()
+
+
 
 
 def test_register_user(client):
@@ -52,4 +63,5 @@ def test_login_unsuccessful(client):
     
     assert login_response.status_code == 200
     assert b'Invalid username or password' in login_response.data
+
 
