@@ -51,7 +51,16 @@
             <img src="{{ url_for('static', filename='cross.png') }}">
         </a>
         <h1>Subscription plans</h1>
-        
+        <div class="plan" id="weekly">
+            <form action="{{ url_for('choose_subscription') }}" method="POST">
+                <h2>Weekly</h2>
+                <p class="price">£2.99</p>
+                <p class="description">(Excl. VAT)</p>
+                <input type="hidden" name="subscription_plan" value="weekly">
+                <button type="submit" name="submit" value="weekly">Choose</button>
+            </form>
+        </div>
+       
     </div>
 
 
