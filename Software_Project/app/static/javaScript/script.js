@@ -67,6 +67,11 @@ function SignUp(){
     form1.style.display = "block";
     overlay1.style.display = "block";
 
+    // If close button is clicked, the form, overlay should disappear
+    closeFormButton1.addEventListener("click", function () {
+        form1.style.display = "none";
+        overlay1.style.display = "none";
+    });
 }
 
 function calculateRoute() {
