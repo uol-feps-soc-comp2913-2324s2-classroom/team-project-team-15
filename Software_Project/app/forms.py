@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, DateField, SubmitField, StringField
+from wtforms import PasswordField, DateField, SubmitField, StringField, RadioField
 from wtforms.validators import DataRequired, EqualTo, InputRequired, Length, Regexp, Email, ValidationError
 from app.models import User
 
@@ -46,3 +46,8 @@ class RegistrationForm(FlaskForm):
     def validate_confirm_password(self, confirm_password):
         if self.password.data != confirm_password.data:
             raise ValidationError('Passwords do not match.')
+
+
+class CSRFProtectForm(FlaskForm):
+    """A simple form just for CSRF protection."""
+    pass    

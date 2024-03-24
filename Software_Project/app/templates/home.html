@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}
+Index
+{% endblock %}
+
+{% block body %}
+
+<body>
+    <header>
+        <div class="container">
+            <img src="your-logo.png" alt="Your App Logo" class="logo">
+            <nav>
+                <a href="#section1">Features</a>
+                <a href="#section2">Pricing</a>
+                <a href="#section3">Contact</a>
+                <button>Login</button>
+                <button>Sign Up</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="section1">
+            <div class="container">
+                <h2>Features</h2>
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>Track Your Routes</h3>
+                        <p>Monitor your progress and explore new routes.</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-heartbeat"></i>
+                        <h3>Stay Healthy</h3>
+                        <p>Keep track of your workouts and improve your fitness.</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-medal"></i>
+                        <h3>Compete with Friends</h3>
+                        <p>Challenge your friends and compare achievements.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="section2" class="pricing-section">
+            <div class="container">
+                <h2>Pricing</h2>
+                <div class="pricing-plans">
+                    <div class="pricing-plan">
+                        <h3>Weekly</h3>
+                        <p>$0<span>/month</span></p>
+                        <ul>
+                            <li>Track Routes</li>
+                            <li>Basic Stats</li>
+                            <li>Limited Challenges</li>
+                        </ul>
+                        <button>Choose Plan</button>
+                    </div>
+                    <div class="pricing-plan">
+                        <h3>Monthly</h3>
+                        <p>$14.99<span>/month</span></p>
+                        <ul>
+                            <li>Advanced Features</li>
+                            <li>Full Stats</li>
+                            <li>Unlimited Challenges</li>
+                        </ul>
+                        <button>Choose Plan</button>
+                    </div>
+                    <div class="pricing-plan">
+                        <h3>Annual</h3>
+                        <p>$9.99<span>/month</span></p>
+                        <ul>
+                            <li>Track Routes</li>
+                            <li>Basic Stats</li>
+                            <li>Limited Challenges</li>
+                        </ul>
+                        <button>Choose Plan</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="section3" class="contact-section">
+            <div class="container">
+                <h2>Contact</h2>
+                <p>Get in touch with us for any inquiries or feedback.</p>
+                <form>
+                    <input type="text" placeholder="Your Name">
+                    <input type="email" placeholder="Your Email">
+                    <textarea placeholder="Your Message"></textarea>
+                    <button>Send Message</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Your Company. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="scripts.js"></script>
+</body>
+
+<!-- Flash messages section -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="flashed-messages">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% endblock %}
