@@ -24,6 +24,7 @@ class User(db.Model, UserMixin):
     subscription_plan_id = db.Column(db.Integer, db.ForeignKey('subscription_plan.id'))
     subscription_start_date = db.Column(db.Date, nullable=True)
     stripe_customer_id = db.Column(db.String(255), nullable=True, unique=True)
+    journey = db.relationship('JourneyRecord', backref='users', lazy=True)
     journeys = db.relationship('Journey', backref='users', lazy=True)
     friends = db.relationship('User', secondary=friends,
                               primaryjoin=(friends.c.user_id == id),
@@ -64,6 +65,19 @@ class Journey(db.Model):
     def status(self):
         # Assuming end_location and endpoint_location are comparable strings; you might need more sophisticated comparison based on actual GPS coordinates
         return "complete" if self.end_location == self.endpoint_location else "incomplete"
+
+class JourneyRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    origin= db.Column(db.String(100))
+    destination = db.Column(db.String(100))
+    waypoints = db.Column(db.String(500)) # Stored as a JSON string
+    time_taken = db.Column(db.Integer) # Assume time is in minutes
+
+    def __repr__(self):
+        return f"<Journey {self.origin} to {self.destination}>"
+
+
 
 class SubscriptionPlan(db.Model):
     __tablename__ = 'subscription_plan'

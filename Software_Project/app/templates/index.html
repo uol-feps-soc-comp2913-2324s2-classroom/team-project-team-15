@@ -1,56 +1,179 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block body %}
+<head>
+    <meta charset="UTF-8">
+    <title>Journey Details</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 400px;
+            margin-bottom: 20px;
+        }
 
-<body onload="initMap()">
 
-    <main>
-        <div id="map-container">
-            <div id="map"></div>
+        .suggestions {
+            border: 1px solid #ccc;
+            border-top: none;
+            position: absolute;
+            z-index: 1000;
+            width: calc(100% - 2px);
+            background: white;
+            display: none;
+            /* Initially hide the suggestions */
+        }
+
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        #waypointsList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #waypointsList li {
+            padding: 5px;
+            border: 1px solid #ccc;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Add Your Journey</h2>
+    <div id="map"></div>
+    <form id="journeyForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <div>
+            <input type="text" id="origin" placeholder="Origin" oninput="searchLocation(this.value, 'origin')">
+            <div id="originSuggestions" class="suggestions"></div>
         </div>
-
-        <form method="post" onsubmit="calculateRoute(); return false;">
-            <label for="origin">Origin:</label>
-            <input type="text" id="origin" name="origin" required>
-            <br>
-            <label for="destination">Destination:</label>
-            <input type="text" id="destination" name="destination" required>
-            <br>
-            <div id="waypoints-container">
-                <label for="waypoint1">Waypoint 1:</label>
-                <input type="text" id="waypoint1" class="waypoint-input">
-                <br>
-            </div>
-            <button type="button" onclick="addWaypoint()">Add Waypoint</button>
-            <br>
-            <label for="travel-mode">Travel Mode:</label>
-            <select id="travel-mode" name="travel-mode">
-                <option value="BICYCLING">Cycling</option>
-                <option value="WALKING">Walking</option>
-            </select>
-            <br>
-            <input type="submit" value="Find Route">
-        </form>
-
-        <div id="route-details">
-            <h2 id="total-distance"></h2>
-            <h2 id="total-duration"></h2>
+        <div>
+            <input type="text" id="destination" placeholder="Destination"
+                oninput="searchLocation(this.value, 'destination')">
+            <div id="destinationSuggestions" class="suggestions"></div>
         </div>
-
-        <div class="journey-buttons">
-            <button id="start-journey-btn" onclick="startJourney()">Start Journey</button>
-            <button id="end-journey-btn" onclick="endJourney()" disabled>End Journey</button>
+        <div>
+            <input type="text" id="waypoints" placeholder="Add Waypoints"
+                oninput="searchLocation(this.value, 'waypoints')">
+            <div id="waypointsSuggestions" class="suggestions"></div>
         </div>
-    </main>
+        <ul id="waypointsList"></ul>
+        <input type="number" id="time_taken" placeholder="Time Taken (in minutes)">
+        <br><br>
+        <button type="button" onclick="submitJourney()">Submit Journey</button>
+    </form>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map');
+
+        // Function to set map view to user's current location
+        function setLocation() {
+            map.locate({ setView: true, maxZoom: 16 });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        }
+
+        // Handle geolocation success/failure
+        function onLocationFound(e) {
+            var radius = e.accuracy / 2;
+            L.marker(e.latlng).addTo(map)
+                .bindPopup("You are within " + radius + " meters from this point").openPopup();
+            L.circle(e.latlng, radius).addTo(map);
+        }
+
+        function onLocationError(e) {
+            alert(e.message);
+        }
+
+        map.on('locationfound', onLocationFound);
+        map.on('locationerror', onLocationError);
+
+        // Initialize location
+        setLocation();
+
+        function searchLocation(query, inputId) {
+            if (query.length < 3) {
+                document.getElementById(inputId + 'Suggestions').style.display = 'none';
+                return; // Avoid too many requests for short queries
+            }
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    displaySuggestions(data, inputId);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function displaySuggestions(data, inputId) {
+            let suggestionsBox = document.getElementById(inputId + 'Suggestions');
+            suggestionsBox.innerHTML = ''; // Clear previous suggestions
+            if (data.length > 0) {
+                data.forEach(item => {
+                    let div = document.createElement('div');
+                    div.innerHTML = item.display_name;
+                    div.className = 'suggestion-item';
+                    div.onclick = function () {
+                        if (inputId === 'waypoints') {
+                            addWaypoint(item.display_name);
+                            document.getElementById(inputId).value = ''; // Clear input for next waypoint
+                        } else {
+                            document.getElementById(inputId).value = item.display_name;
+                        }
+                        suggestionsBox.style.display = 'none';
+                    };
+                    suggestionsBox.appendChild(div);
+                });
+                suggestionsBox.style.display = 'block';
+            } else {
+                suggestionsBox.style.display = 'none';
+            }
+        }
+
+        function addWaypoint(waypoint) {
+            let list = document.getElementById('waypointsList');
+            let listItem = document.createElement('li');
+            listItem.textContent = waypoint;
+            list.appendChild(listItem);
+        }
+
+
+
+        function submitJourney() {
+            const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+            const journeyData = {
+                origin: document.getElementById('origin').value,
+                destination: document.getElementById('destination').value,
+                waypoints: document.getElementById('waypoints').value, // Ensure this is formatted correctly if it's meant to be JSON
+                time_taken: parseInt(document.getElementById('time_taken').value, 10),
+            };
+
+            fetch('/add-journey', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken, // Include the CSRF token in the request headers
+                },
+                body: JSON.stringify(journeyData),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+    </script>
 </body>
-<!-- Flash messages section -->
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul class="flashed-messages">
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endwith %}
-{% endblock %}
+
+</html>
