@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function () {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
     }
-
     map.on('locationfound', onLocationFound);
     map.on('locationerror', onLocationError);
 
