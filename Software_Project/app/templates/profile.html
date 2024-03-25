@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/base.css')}}">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://js.stripe.com/v3/"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_IDAXXGAVJYlMrrRt6gpBDhumrkQ-CbY"></script>
-    {% block head %}{% endblock %}
+    <title>User Profile</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -76,7 +73,7 @@
         }
         .popup-form1 {
             width: 390px;
-
+            
             justify-content: center;
             background: white;
             text-align: center;
@@ -112,9 +109,9 @@
         }
         .closeBtn {
             position: absolute;
-            top: 0;
-            right: 0;
-            cursor: pointer;
+            top: 0; 
+            right: 0; 
+            cursor: pointer; 
             border-radius: 0 0 0 20px;
             border-bottom: 3px solid #ff6600;
             border-left: 3px solid #ff6600;
@@ -254,18 +251,13 @@
             clear: both;
         }
 
+
     </style>
 </head>
-
 <body>
-    <header>
-        <h1 id="title">MyRoute</h1>
-        <nav id="navbar">
-            <a href="#" class="nav-button">Nav 1</a>
-            <a href="#" class="nav-button">Nav 2</a>
-        </nav>
-    </header>
-
+    <div class="member">
+        Not a member? <a href="#" onclick="SignUp()">Register Here</a>
+     </div>
     <div class="overlay1" id="overlay1"></div>
     <div class="popup-form1" id="popupForm1" style="display: none;">
         <a class="closeBtn" id="closeForm1" tabindex="4">
@@ -290,7 +282,6 @@
           <button onclick="SignUp2()" type="submit" class="submitBtn" tabindex="3" >Logout</button>
         </form>
     </div>
-
 
     <div class="popup-form2" id="popupForm2" style="display: none;">
         <a class="closeBtn" id="closeForm2" tabindex="4">
@@ -330,8 +321,41 @@
 
 
 
-    <script src="{{ url_for('static',filename='javascript/script.js')}}"></script>
-    {% block body %} {% endblock %}
-</body>
 
+
+
+    <script>
+        function SubBox(){
+            const form1 = document.getElementById("popupForm1");
+            const form2 = document.getElementById("popupForm2");
+            const overlay1 = document.getElementById("overlay1");
+            const closeFormButton2 = document.getElementById("closeForm2");
+            form1.style.display = "none";
+            form2.style.display = "block";
+            
+
+            // If close button is clicked, the form, overlay should disappear
+            closeFormButton2.addEventListener("click", function () {
+                form2.style.display = "none";
+                overlay1.style.display = "none";
+            });
+        }
+
+
+        function SignUp(){
+            const form1 = document.getElementById("popupForm1");
+            const overlay1 = document.getElementById("overlay1");
+            const closeFormButton1 = document.getElementById("closeForm1");
+
+            form1.style.display = "block";
+            overlay1.style.display = "block";
+
+            // If close button is clicked, the form, overlay should disappear
+            closeFormButton1.addEventListener("click", function () {
+                form1.style.display = "none";
+                overlay1.style.display = "none";
+            });
+        }
+    </script>
+</body>
 </html>

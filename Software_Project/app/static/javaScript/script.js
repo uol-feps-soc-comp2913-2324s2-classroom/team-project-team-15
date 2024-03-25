@@ -43,6 +43,37 @@ function initMap() {
     }
 }
 
+function SubBox(){
+    const form1 = document.getElementById("popupForm1");
+    const form2 = document.getElementById("popupForm2");
+    const overlay1 = document.getElementById("overlay1");
+    const closeFormButton2 = document.getElementById("closeForm2");
+    form1.style.display = "none";
+    form2.style.display = "block";
+
+
+    // If close button is clicked, the form, overlay should disappear
+    closeFormButton2.addEventListener("click", function () {
+        form2.style.display = "none";
+        overlay1.style.display = "none";
+    });
+}
+
+function SignUp(){
+    const form1 = document.getElementById("popupForm1");
+    const overlay1 = document.getElementById("overlay1");
+    const closeFormButton1 = document.getElementById("closeForm1");
+
+    form1.style.display = "block";
+    overlay1.style.display = "block";
+
+    // If close button is clicked, the form, overlay should disappear
+    closeFormButton1.addEventListener("click", function () {
+        form1.style.display = "none";
+        overlay1.style.display = "none";
+    });
+}
+
 function calculateRoute() {
     var origin = document.getElementById('origin').value;
     var destination = document.getElementById('destination').value;
