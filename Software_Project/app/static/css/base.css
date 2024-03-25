@@ -1,0 +1,608 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f7f7;
+    color: #333;
+    box-sizing: border-box;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ff6600;
+    padding: 1vw;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#title {
+    color: #fff;
+    font-size: 2em;
+    margin-left: 4vw;
+    margin-right: auto;
+    padding-left: 4vw;
+}
+
+main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 2vw;
+    padding: 20px;
+}
+
+nav#navbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.nav-button {
+    display: inline-block;
+    background-color: #ffffff;
+    color: #000000;
+    text-decoration: none;
+    font-size: 1em;
+    padding: 1vw 4.6vw;
+    margin: 0 1vw;
+    border-radius: 25px;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.3s;
+    border: 2.2px solid transparent;
+}
+
+.nav-button:hover {
+    background-color: #fff;
+    color: #ff6600;
+    cursor: pointer;
+    border-color: #5c5c5c;
+    transform: translateY(-5px);
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 15px;
+}
+
+.button:hover {
+    background-color: #3e8e41
+}
+
+.button:active {
+    background-color: #3e8e41;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+}
+
+
+
+@media (max-width: 768px) {
+    #title {
+        font-size: 1.5em;
+    }
+
+    .nav-button {
+        padding: 0.8vw 2.5vw;
+        margin: 0 0.5vw;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    #title {
+        margin: 0;
+        padding: 2vw 0;
+    }
+
+    nav#navbar {
+        justify-content: center;
+        padding: 2vw 0;
+    }
+
+    .nav-button {
+        font-size: 0.9em;
+    }
+}
+
+
+
+
+
+#login-box {
+    background-color: #ffffff;
+    width: 300px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 50px auto;
+    text-align: center;
+}
+
+#login-options {
+    margin-bottom: 20px;
+}
+
+.login-option-button {
+    background-color: #ff6600;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-option-button:hover {
+    background-color: #e55d00;
+}
+
+#login-form input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+#login-button {
+    width: 80%;
+    padding: 10px;
+    background-color: #ff6600;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#login-button:hover {
+    background-color: #e55d00;
+}
+
+#register-button {
+    width: 75%;
+    padding: 10px;
+    margin-top: 20px;
+    background-color: #5c5c5c;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#register-button:hover {
+    background-color: #6f6e6e;
+}
+
+#register-box {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: block;
+    flex-direction: column;
+    align-items: center;
+}
+
+#register-box h2 {
+    text-align: center;
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+.form-control {
+    width: 75%;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.submit-button {
+    width: 75%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #ff6600;
+    color: white;
+    cursor: pointer;
+    display: block;
+    align-items: center;
+    margin: auto;
+}
+
+
+.subscription-container {
+    max-width: 960px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.subscription-container h1 {
+    text-align: center;
+    color: #ff6600;
+}
+
+.plan {
+    float: left;
+    width: calc(33.333% - 40px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.plan h2 {
+    color: #ff6600;
+    border-bottom: 1px solid #ff6600;
+    padding-bottom: 10px;
+}
+
+.plan .price {
+    font-size: 30px;
+    color: black;
+    text-align: center;
+}
+
+.plan ul {
+    list-style: none;
+    padding: 0;
+}
+
+.plan ul li {
+    background-color: #f2f2f2;
+    margin-bottom: 5px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.plan button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: #ff6600;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.plan button:hover {
+    background-color: #e65c00;
+}
+
+.featured {
+    position: relative;
+}
+
+.featured::before {
+    content: "★";
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 20px;
+    color: #ff6600;
+}
+
+.subscription-container::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+
+
+#map-container {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#map {
+    height: 400px;
+    width: 100%;
+}
+
+
+.journey-buttons {
+    margin-top: 20px;
+}
+
+.journey-buttons button:disabled {
+    background-color: #ccc;
+    /* Grey color */
+    cursor: not-allowed;
+    /* Change cursor to not-allowed */
+}
+
+
+.search-bar {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.search-bar select {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: white;
+}
+
+.friends-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.friend-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.friend-details {
+    margin-bottom: 10px;
+}
+
+.remove-btn {
+    background-color: #FF4500;
+    /* Red-orange from your file */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.remove-btn:hover {
+    background-color: #FF6347;
+    /* Lighter shade of red-orange on hover from your file */
+}
+
+.card {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    height: 35vh;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 35px 80px rgb(0, 0, 0, 0.15);
+    transition: 0.5s;
+    margin: 2vh auto;
+}
+
+.card:hover {
+    height: 70vh;
+}
+
+.imgBx {
+    position: absolute;
+    left: 50%;
+    top: -1vh;
+    transform: translateX(-50%);
+    overflow: hidden;
+    transition: transform 0.5s ease, opacity 0.5s ease, width 0.5s ease, height 0.5s ease;
+    /* Smooth transitions for multiple properties */
+    border-radius: 20px;
+    width: 10vw;
+    height: 10vw;
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.35);
+}
+
+.imgBx img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+    transition: width 0.5s ease, height 0.5s ease;
+    /* Smooth transition for size changes */
+}
+
+.card:hover .imgBx {
+    height: 8vw;
+    width: 8vw;
+}
+
+.card:hover .imgBx img {
+    transition-delay: 0.5s;
+}
+
+.card .content {
+    position: absolute;
+    top: 40px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    overflow: hidden;
+    padding: 40px;
+}
+
+.card .content .details {
+    padding: 1vw;
+    text-align: center;
+    width: 100%;
+    transition: 0.5s;
+    transform: translateY(150px);
+}
+
+.card:hover .content .details {
+    transform: translateY(0px);
+}
+
+.card .content .details h2 {
+    font-size: 1.25em;
+    font-weight: 600;
+    color: #555;
+    line-height: 1.2em;
+    margin-bottom: 30px;
+}
+
+.card .content .details h2 span {
+    font-size: 0.75em;
+    font-weight: 500;
+    opacity: 0.5;
+}
+
+.card .content .details .data {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 20px 0;
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.5s, opacity 0.5s;
+}
+
+.card:hover .content .details .data {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.card .content .details .data h3 {
+    font-size: 1em;
+    color: #555;
+    line-height: 1.2em;
+    font-weight: 600;
+
+}
+
+.card .content .details .data h3 span {
+    font-size: 0.85em;
+    font-weight: 400;
+    opacity: 0.5;
+}
+
+.card .content .details .actionBtn {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 20px;
+
+}
+
+.card .content .details .actionBtn button {
+    padding: 10px 30px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    font-weight: 500;
+    background: #fc6107;
+    color: #fff;
+    cursor: pointer
+}
+
+
+.mapBx {
+    overflow: hidden;
+    transition: 0.5s;
+    width: 80%;
+    height: 0;
+    /* Start with height 0 to make the map not visible initially */
+    margin: 0 auto 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 30px;
+}
+
+.mapBx img {
+    max-width: 100%;
+    height: 0;
+    /* Set to 0 so it takes no space */
+    object-fit: contain;
+    transition: height 0.5s ease;
+    /* Smooth transition for height change */
+    border-radius: 20px;
+}
+
+/* On hover, change the height of the .mapBx and its image to make it visible */
+.card:hover .mapBx {
+    height: 25vh;
+    /* Set a fixed height on hover */
+}
+
+.card:hover .mapBx img {
+    height: 100%;
+    /* The image expands to the height of its container */
+}
+
+#map {
+    height: 400px;
+    margin-bottom: 20px;
+}
+
+
+.suggestions {
+    border: 1px solid #ccc;
+    border-top: none;
+    position: absolute;
+    z-index: 1000;
+    width: calc(100% - 2px);
+    background: white;
+    display: none;
+    /* Initially hide the suggestions */
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+
+#waypointsList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#waypointsList li {
+    padding: 5px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+}

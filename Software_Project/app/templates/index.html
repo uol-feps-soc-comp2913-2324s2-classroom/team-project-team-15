@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}
+Route
+{% endblock %}
+
+{% block head %}
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+{% endblock %}
+
+{% block body %}
+
+<body>
+    <h2>Add Your Journey</h2>
+    <div id="map"></div>
+    <form id="journeyForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <div>
+            <input type="text" id="origin" placeholder="Origin" oninput="searchLocation(this.value, 'origin')">
+            <div id="originSuggestions" class="suggestions"></div>
+        </div>
+        <div>
+            <input type="text" id="destination" placeholder="Destination"
+                oninput="searchLocation(this.value, 'destination')">
+            <div id="destinationSuggestions" class="suggestions"></div>
+        </div>
+        <div>
+            <input type="text" id="waypoints" placeholder="Add Waypoints"
+                oninput="searchLocation(this.value, 'waypoints')">
+            <div id="waypointsSuggestions" class="suggestions"></div>
+        </div>
+        <ul id="waypointsList"></ul>
+        <input type="number" id="time_taken" placeholder="Time Taken (in minutes)">
+        <br><br>
+        <button type="button" onclick="submitJourney()">Submit Journey</button>
+    </form>
+
+
+</body>
+{% endblock %}
