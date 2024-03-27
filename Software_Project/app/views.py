@@ -239,20 +239,3 @@ def gps_page():
     # Fetch all journeys for the current user to display
     journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
     return render_template('index.html', journeys=journeys)
-
-
-@app.route('/api/journeys')
-def get_journeys():
-    journeys = JourneyRecord.query.all()
-    journey_list = []
-    for journey in journeys:
-        journey_list.append({
-            "origin": journey.origin,
-            "destination": journey.destination,
-            "waypoints": journey.waypoints  # Assuming waypoints is stored in a suitable format; adjust as needed
-        })
-    return jsonify(journey_list)
-
-@app.route('/journeys/map')
-def show_journeys_map():
-    return render_template('index.html')
