@@ -7,9 +7,9 @@ Route
 {% block head %}
 
 <head>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.5.1/gpx.min.js"></script>
+
 </head>
+
 {% endblock %}
 
 {% block body %}
@@ -38,18 +38,13 @@ Route
         <input type="number" id="time_taken" placeholder="Time Taken (in minutes)">
         <br><br>
         <button type="button" onclick="submitJourney()">Submit Journey</button>
-        <button type="button" id="drawRoute">Draw Route</button>
     </form>
-
-    <form id="gpxUploadForm">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        <div>
-            <label for="gpxFile">Upload GPX File:</label>
-            <input type="file" id="gpxFile" name="gpxFile" accept=".gpx">
-        </div>
-        <button type="button" onclick="uploadGPX()">Upload Route</button>
-    </form>
-
+    <!-- Include Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Include Leaflet Routing Machine JavaScript -->
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <!-- Include your script.js file -->
+    <script src="script.js"></script>
 
 </body>
 {% endblock %}
