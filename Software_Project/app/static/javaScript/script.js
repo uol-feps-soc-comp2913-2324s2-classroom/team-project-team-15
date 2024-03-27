@@ -18,15 +18,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize location
     setLocation();
 
-        // Initialize the geocoder
-        var geocoder = L.Control.geocoder({
-            geocoder: L.Control.Geocoder.nominatim,
-            defaultMarkGeocode: false,
-        }).addTo(map);
+    // Initialize the geocoder
+    var geocoder = L.Control.geocoder({
+        geocoder: L.Control.Geocoder.nominatim,
+        defaultMarkGeocode: false,
+    }).addTo(map);
 
     // Rest of your functions (searchLocation, displaySuggestions, etc.)
-     // Initialize routing control
-     var routingControl = L.Routing.control({
+    // Initialize routing control
+    var routingControl = L.Routing.control({
         waypoints: [],
         routeWhileDragging: true,
         geocoder: L.Control.Geocoder.nominatim,
@@ -125,38 +125,38 @@ function submitJourney() {
         },
         body: JSON.stringify(journeyData),
     })
-    .then(response => response.json())
-    .then(data => {
-        // Handle the server response if needed
+        .then(response => response.json())
+        .then(data => {
+            // Handle the server response if needed
 
-        // Geocode the origin, destination, and waypoints
-        const geocodePromises = [ // Create the list of promises
-            geocodeAddress(origin),
-            geocodeAddress(destination),
-            ...waypoints.map(geocodeAddress)
-        ];
+            // Geocode the origin, destination, and waypoints
+            const geocodePromises = [ // Create the list of promises
+                geocodeAddress(origin),
+                geocodeAddress(destination),
+                ...waypoints.map(geocodeAddress)
+            ];
 
-        Promise.all(geocodePromises) // Return the Promise.all call
-        .then(([originLatLng, destinationLatLng, ...waypointLatLngs]) => {
-            // Calculate route and display on map
-            var routingOptions = {
-                waypoints: [
-                    L.latLng(...originLatLng),
-                    ...waypointLatLngs.map(latlng => L.latLng(...latlng)),
-                    destinationLatLng
-                ],
-                routeWhileDragging: true,
-                geocoder: L.Control.Geocoder.nominatim(),
-                lineOptions: {
-                    styles: [{ color: '#007bff', opacity: 1, weight: 5 }]
-                }
-            };
-            routingControl.removeFrom(map); // Remove existing routing control
-            var routingControl = L.Routing.control(routingOptions).addTo(map);
+            Promise.all(geocodePromises) // Return the Promise.all call
+                .then(([originLatLng, destinationLatLng, ...waypointLatLngs]) => {
+                    // Calculate route and display on map
+                    var routingOptions = {
+                        waypoints: [
+                            L.latLng(...originLatLng),
+                            ...waypointLatLngs.map(latlng => L.latLng(...latlng)),
+                            destinationLatLng
+                        ],
+                        routeWhileDragging: true,
+                        geocoder: L.Control.Geocoder.nominatim(),
+                        lineOptions: {
+                            styles: [{ color: '#007bff', opacity: 1, weight: 5 }]
+                        }
+                    };
+                    routingControl.removeFrom(map); // Remove existing routing control
+                    var routingControl = L.Routing.control(routingOptions).addTo(map);
+                })
+                .catch(error => console.error('Error:', error));
         })
-    .catch(error => console.error('Error:', error));
-})
-.catch(error => console.error('Error:',error));
+        .catch(error => console.error('Error:', error));
 }
 
 
@@ -215,4 +215,50 @@ function SignUp() {
         form1.style.display = "none";
         overlay1.style.display = "none";
     });
+}
+
+function uploadGPX() {
+    const fileInput = document.getElementById('gpxFile');
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            // Parse the GPX file content
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(event.target.result, "text/xml");
+
+            // Extract waypoints or track points from the GPX
+            const trkpts = xmlDoc.getElementsByTagName("trkpt");
+            const wpts = xmlDoc.getElementsByTagName("wpt"); // Use this if your GPX uses <wpt> elements
+            const points = trkpts.length > 0 ? trkpts : wpts; // Choose track points or waypoints based on your GPX structure
+
+            if (points.length > 0) {
+                // Set origin to the first point
+                const originLat = points[0].getAttribute("lat");
+                const originLon = points[0].getAttribute("lon");
+                document.getElementById("origin").value = `${originLat}, ${originLon}`;
+
+                // Set destination to the last point
+                const destLat = points[points.length - 1].getAttribute("lat");
+                const destLon = points[points.length - 1].getAttribute("lon");
+                document.getElementById("destination").value = `${destLat}, ${destLon}`;
+
+                // Handle waypoints (if any) - concatenate intermediate points
+                let waypointsValue = "";
+                for (let i = 1; i < points.length - 1; i++) {
+                    const lat = points[i].getAttribute("lat");
+                    const lon = points[i].getAttribute("lon");
+                    waypointsValue += `${lat}, ${lon}; `;
+                }
+                document.getElementById("waypoints").value = waypointsValue.trim();
+            } else {
+                alert("No route data found in the GPX file.");
+            }
+        };
+
+        reader.readAsText(file);
+    } else {
+        alert("Please select a GPX file to upload.");
+    }
 }

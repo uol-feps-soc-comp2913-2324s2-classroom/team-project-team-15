@@ -6,10 +6,6 @@ Route
 
 {% block head %}
 
-<head>
-
-</head>
-
 {% endblock %}
 
 {% block body %}
@@ -38,6 +34,15 @@ Route
         <input type="number" id="time_taken" placeholder="Time Taken (in minutes)">
         <br><br>
         <button type="button" onclick="submitJourney()">Submit Journey</button>
+    </form>
+
+    <form id="gpxUploadForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <div>
+            <label for="gpxFile">Upload GPX File:</label>
+            <input type="file" id="gpxFile" name="gpxFile" accept=".gpx">
+        </div>
+        <button type="button" onclick="uploadGPX()">Upload Route</button>
     </form>
     <!-- Include Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
