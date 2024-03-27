@@ -1,4 +1,7 @@
+var routingControl;
 var map;
+
+
 document.addEventListener('DOMContentLoaded', function () {
     var map = L.map('map').setView([51.505, -0.09], 13); // Default view
 
@@ -12,12 +15,31 @@ document.addEventListener('DOMContentLoaded', function () {
     map.on('locationfound', onLocationFound);
     map.on('locationerror', onLocationError);
 
-    // Add event listener to the Draw button
-    document.getElementById('drawRoute').addEventListener('click', function () {
-        drawJourneyRoute();
-    });
+    // Initialize location
     setLocation();
+
+        // Initialize the geocoder
+        var geocoder = L.Control.geocoder({
+            geocoder: L.Control.Geocoder.nominatim,
+            defaultMarkGeocode: false,
+        }).addTo(map);
+
+    // Rest of your functions (searchLocation, displaySuggestions, etc.)
+     // Initialize routing control
+     var routingControl = L.Routing.control({
+        waypoints: [],
+        routeWhileDragging: true,
+        geocoder: L.Control.Geocoder.nominatim,
+        lineOptions: {
+            styles: [{ color: '#007bff', opacity: 1, weight: 5 }]
+        }
+    }).addTo(map);
+
 });
+
+
+
+
 
 function onLocationFound(e) {
     var radius = e.accuracy / 2;
@@ -30,6 +52,8 @@ function onLocationError(e) {
     alert(e.message);
 }
 
+// // Initialize location
+// setLocation();
 
 function searchLocation(query, inputId) {
     if (query.length < 3) {
@@ -76,18 +100,23 @@ function addWaypoint(waypoint) {
     list.appendChild(listItem);
 }
 
-
-
 function submitJourney() {
-    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+    const origin = document.getElementById('origin').value;
+    const destination = document.getElementById('destination').value;
+    const waypointsInput = document.getElementById('waypoints').value;
+    const waypoints = waypointsInput ? waypointsInput.split(',').map(wp => wp.trim()) : [];
+    const time_taken = parseInt(document.getElementById('time_taken').value, 10);
+
+    // Construct journey data
     const journeyData = {
-        origin: document.getElementById('origin').value,
-        destination: document.getElementById('destination').value,
-        waypoints: document.getElementById('waypoints').value,
-        time_taken: parseInt(document.getElementById('time_taken').value, 10),
+        origin: origin,
+        destination: destination,
+        waypoints: waypoints.join(','),
+        time_taken: time_taken,
     };
 
-
+    // Send journey data to server
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
     fetch('/add-journey', {
         method: 'POST',
         headers: {
@@ -96,46 +125,67 @@ function submitJourney() {
         },
         body: JSON.stringify(journeyData),
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            // Handle the response, e.g., showing a success message
+    .then(response => response.json())
+    .then(data => {
+        // Handle the server response if needed
+
+        // Geocode the origin, destination, and waypoints
+        const geocodePromises = [ // Create the list of promises
+            geocodeAddress(origin),
+            geocodeAddress(destination),
+            ...waypoints.map(geocodeAddress)
+        ];
+
+        Promise.all(geocodePromises) // Return the Promise.all call
+        .then(([originLatLng, destinationLatLng, ...waypointLatLngs]) => {
+            // Calculate route and display on map
+            var routingOptions = {
+                waypoints: [
+                    L.latLng(...originLatLng),
+                    ...waypointLatLngs.map(latlng => L.latLng(...latlng)),
+                    destinationLatLng
+                ],
+                routeWhileDragging: true,
+                geocoder: L.Control.Geocoder.nominatim(),
+                lineOptions: {
+                    styles: [{ color: '#007bff', opacity: 1, weight: 5 }]
+                }
+            };
+            routingControl.removeFrom(map); // Remove existing routing control
+            var routingControl = L.Routing.control(routingOptions).addTo(map);
         })
-        .catch(error => console.error('Error:', error));
-
-    // Draw the route on the map
-    drawRoute(waypoints);
+    .catch(error => console.error('Error:', error));
+})
+.catch(error => console.error('Error:',error));
 }
 
-function drawJourneyRoute() {
-    const waypointsInput = document.getElementById('waypoints').value;
-    // Parse waypoints input into a format suitable for Leaflet (assuming semicolon-separated lat,lng pairs)
-    const waypoints = waypointsInput.split(';').map(wp => {
-        const [lat, lng] = wp.split(',').map(Number);
-        return [lat, lng];
-    });
 
-    drawRoute(waypoints);
-}
 
-function drawRoute(waypoints) {
-    // Check if a route already exists on the map; if so, remove it
-    if (window.currentRoute) {
-        map.removeLayer(window.currentRoute);
+async function geocodeAddress(address) {
+    const apiUrl = 'https://nominatim.openstreetmap.org/search';
+    const params = {
+        format: 'json',
+        q: address,
+        addressdetails: 1,
+        polygon: 0,
+        limit: 1
+    };
+
+    try {
+        const response = await fetch(`${apiUrl}?${new URLSearchParams(params)}`);
+        const data = await response.json();
+
+        if (data.length > 0) {
+            const latlng = data[0].lat + ',' + data[0].lon;
+            return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        } else {
+            throw new Error('Address not found');
+        }
+    } catch (error) {
+        console.error('Error geocoding address:', error);
+        return null;
     }
-
-    // Draw the new route
-    window.currentRoute = L.polyline(waypoints, {
-        color: 'blue',
-        weight: 4,
-        opacity: 0.7,
-    }).addTo(map);
-
-    // Zoom the map to fit the route
-    map.fitBounds(window.currentRoute.getBounds());
 }
-
-
 function SubBox() {
     const form1 = document.getElementById("popupForm1");
     const form2 = document.getElementById("popupForm2");
@@ -165,52 +215,4 @@ function SignUp() {
         form1.style.display = "none";
         overlay1.style.display = "none";
     });
-}
-
-
-
-function uploadGPX() {
-    const fileInput = document.getElementById('gpxFile');
-    if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-
-        reader.onload = function (event) {
-            // Parse the GPX file content
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(event.target.result, "text/xml");
-
-            // Extract waypoints or track points from the GPX
-            const trkpts = xmlDoc.getElementsByTagName("trkpt");
-            const wpts = xmlDoc.getElementsByTagName("wpt"); // Use this if your GPX uses <wpt> elements
-            const points = trkpts.length > 0 ? trkpts : wpts; // Choose track points or waypoints based on your GPX structure
-
-            if (points.length > 0) {
-                // Set origin to the first point
-                const originLat = points[0].getAttribute("lat");
-                const originLon = points[0].getAttribute("lon");
-                document.getElementById("origin").value = `${originLat}, ${originLon}`;
-
-                // Set destination to the last point
-                const destLat = points[points.length - 1].getAttribute("lat");
-                const destLon = points[points.length - 1].getAttribute("lon");
-                document.getElementById("destination").value = `${destLat}, ${destLon}`;
-
-                // Handle waypoints (if any) - concatenate intermediate points
-                let waypointsValue = "";
-                for (let i = 1; i < points.length - 1; i++) {
-                    const lat = points[i].getAttribute("lat");
-                    const lon = points[i].getAttribute("lon");
-                    waypointsValue += `${lat}, ${lon}; `;
-                }
-                document.getElementById("waypoints").value = waypointsValue.trim();
-            } else {
-                alert("No route data found in the GPX file.");
-            }
-        };
-
-        reader.readAsText(file);
-    } else {
-        alert("Please select a GPX file to upload.");
-    }
 }
