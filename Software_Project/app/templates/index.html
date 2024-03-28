@@ -9,6 +9,10 @@ Route
 {% endblock %}
 
 {% block body %}
+<head>
+    <!-- Include Leaflet Control Geocoder CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+</head>
 
 <body>
     <h2>Add Your Journey</h2>
@@ -48,8 +52,11 @@ Route
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <!-- Include Leaflet Routing Machine JavaScript -->
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <!-- Include Leaflet Control Geocoder JavaScript -->
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <!-- Include your script.js file -->
-    <script src="script.js"></script>
+    <script src="<script src="{{ url_for('static', filename='javascript/script.js') }}"></script>
+    "></script>
 
 </body>
 {% endblock %}

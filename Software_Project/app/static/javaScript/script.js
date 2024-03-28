@@ -3,7 +3,7 @@ var map;
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    var map = L.map('map').setView([51.505, -0.09], 13); // Default view
+    map = L.map('map').setView([51.505, -0.09], 13); // Default view
 
     // Function to set map view to user's current location
     function setLocation() {
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Rest of your functions (searchLocation, displaySuggestions, etc.)
     // Initialize routing control
-    var routingControl = L.Routing.control({
+    routingControl = L.Routing.control({
         waypoints: [],
         routeWhileDragging: true,
         geocoder: L.Control.Geocoder.nominatim,
@@ -151,8 +151,10 @@ function submitJourney() {
                             styles: [{ color: '#007bff', opacity: 1, weight: 5 }]
                         }
                     };
-                    routingControl.removeFrom(map); // Remove existing routing control
-                    var routingControl = L.Routing.control(routingOptions).addTo(map);
+                    if (routingControl) { // Check if routingControl is initialized
+                        map.removeControl(routingControl); // Remove existing routing control
+                    }
+                    routingControl = L.Routing.control(routingOptions).addTo(map);
                 })
                 .catch(error => console.error('Error:', error));
         })
