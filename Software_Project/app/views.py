@@ -1,7 +1,8 @@
 import json
-from flask import render_template, redirect, url_for, flash, request,session,jsonify
+from operator import or_
+from flask import render_template, redirect, url_for, flash, request,session,jsonify, current_app
 from app import app, db
-from app.models import SubscriptionPlan, User,Payment, Journey, JourneyRecord
+from app.models import SubscriptionPlan, User,Payment, FriendRequest, JourneyRecord
 from app.forms import RegistrationForm
 from .forms import CSRFProtectForm
 from werkzeug.security import generate_password_hash
@@ -208,11 +209,87 @@ def payment_cancel():
     flash('Payment was canceled.', 'warning')
     return redirect(url_for('index'))
 
+@app.route('/search-users', methods=['GET'])
+@login_required
+def search_users():
+    query = request.args.get('query', '')
+    
+    # Use SQLAlchemy to search for users with usernames or firstnames containing the query
+    users = User.query.filter(
+        or_(User.username.ilike(f'%{query}%'),
+            User.firstname.ilike(f'%{query}%'))).all()
 
-@app.route('/friends', methods=['GET', 'POST'])
+    # Convert the results to a list of dictionaries for JSON part
+    users_json = [{'id': user.id, 'username': user.username, 'firstname': user.firstname}
+                  for user in users]
+
+    # Render the users into HTML using a separate template
+    html_content = render_template('searchResults.html', users=users)
+
+    # Return the results as JSON including both the HTML and the raw data
+    return jsonify({'html': html_content, 'users': users_json})
+
+@app.route('/send-friend-request/<int:requestee_id>', methods=['POST'])
+@login_required
+def send_friend_request(requestee_id):
+    # Prevent self-friend requests
+    if current_user.id == requestee_id:
+        return jsonify({'error': 'Cannot send friend request to yourself'}), 400
+
+    # Check for existing friend request
+    existing_request = FriendRequest.query.filter_by(
+        requester_id=current_user.id, 
+        requestee_id=requestee_id
+    ).first()
+    if existing_request:
+        return jsonify({'error': 'Friend request already sent'}), 400
+    
+    try:
+        # Create and save the new friend request
+        new_request = FriendRequest(
+            requester_id=current_user.id, 
+            requestee_id=requestee_id, 
+            status='pending'
+        )
+        db.session.add(new_request)
+        db.session.commit()
+        return jsonify({'message': 'Friend request sent successfully'}), 200
+    except Exception as e:
+        current_app.logger.error(f"Failed to send friend request: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to send friend request'}), 500
+
+
+@app.route('/fetch-friend-requests', methods=['GET'])
+@login_required
+def fetch_friend_requests():
+    incoming_requests = FriendRequest.query.filter_by(requestee_id=current_user.id, status='pending').all()
+    requests_data = [{'id': req.id, 'username': req.requester.username} for req in incoming_requests]
+    return jsonify(requests_data)
+
+@app.route('/respond-friend-request/<request_id>/<action>', methods=['POST'])
+@login_required
+def respond_to_friend_request(request_id, action):
+    request = FriendRequest.query.get(request_id)
+    if not request or request.requestee_id != current_user.id:
+        return jsonify({'error': 'Request not found or you do not have permission to respond to this request'}), 404
+    if action == 'accept':
+        request.status = 'accepted'
+        # Add logic to add users as friends if necessary
+    elif action == 'reject':
+        request.status = 'rejected'
+    db.session.commit()
+    return jsonify({'message': 'Response recorded'}), 200
+
+@app.route('/friends')
 @login_required
 def friends():
-    return render_template('friends.html')
+    # Assuming FriendRequest has a 'status' column with values like 'pending', 'accepted', etc.
+    incoming_requests = FriendRequest.query.filter_by(requestee_id=current_user.id, status='pending').all()
+    # Assuming you have a list of friend User objects for the current user
+    friends = current_user.friends  # This will depend on how you've set up the friends relationship
+
+    return render_template('friends.html', friends=friends, requests=incoming_requests)
 
 @app.route('/friendsProfile', methods=['GET', 'POST'])
 @login_required

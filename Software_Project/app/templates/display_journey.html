@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Journey Routes</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var map = L.map('map').setView([51.505, -0.09], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        fetch('/api/journeys')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(journey => {
+                    // Draw each journey on the map
+                    // Example for a simple line from origin to destination:
+                    var latlngs = [
+                        journey.origin.split(',').map(Number),
+                        journey.destination.split(',').map(Number)
+                    ];
+                    // Add waypoints if present
+                    if (journey.waypoints) {
+                        journey.waypoints.forEach(wp => {
+                            latlngs.splice(latlngs.length - 1, 0, wp.split(',').map(Number));  // Insert waypoints before destination
+                        });
+                    }
+                    var polyline = L.polyline(latlngs, { color: 'blue' }).addTo(map);
+                    map.fitBounds(polyline.getBounds());
+                });
+            });
+    </script>
+</body>
+
+</html>
