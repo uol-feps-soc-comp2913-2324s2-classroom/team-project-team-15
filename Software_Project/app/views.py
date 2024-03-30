@@ -267,19 +267,44 @@ def fetch_friend_requests():
     requests_data = [{'id': req.id, 'username': req.requester.username} for req in incoming_requests]
     return jsonify(requests_data)
 
-@app.route('/respond-friend-request/<request_id>/<action>', methods=['POST'])
+@app.route('/respond-friend-request/<int:request_id>/<action>', methods=['POST'])
 @login_required
-def respond_to_friend_request(request_id, action):
-    request = FriendRequest.query.get(request_id)
-    if not request or request.requestee_id != current_user.id:
-        return jsonify({'error': 'Request not found or you do not have permission to respond to this request'}), 404
+def respond_friend_request(request_id, action):
+    friend_request = FriendRequest.query.get_or_404(request_id)
+    if friend_request.requestee_id != current_user.id:
+        return jsonify({'error': 'This request is not for the current user.'}), 403
+
     if action == 'accept':
-        request.status = 'accepted'
-        # Add logic to add users as friends if necessary
+        # Assuming you have a method or logic to retrieve the User model instance
+        requester = User.query.get(friend_request.requester_id)
+        requestee = User.query.get(friend_request.requestee_id)
+
+        # Add each user to the other's friends list
+        requester.friends.append(requestee)
+        requestee.friends.append(requester)
+
+        friend_request.status = 'accepted'  # Optionally, you could delete the request
     elif action == 'reject':
-        request.status = 'rejected'
+        friend_request.status = 'rejected'  # Or delete the request
+    else:
+        return jsonify({'error': 'Invalid action.'}), 400
+
     db.session.commit()
-    return jsonify({'message': 'Response recorded'}), 200
+    return jsonify({'message': f'Friend request {action}ed successfully.'})
+
+
+
+def remove_friend(user_id, friend_id):
+    user = User.query.get(user_id)
+    friend = User.query.get(friend_id)
+
+    if friend in user.friends:
+        user.friends.remove(friend)
+        friend.friends.remove(user)
+        db.session.commit()
+        return True
+    return False
+
 
 @app.route('/friends')
 @login_required
