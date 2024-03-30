@@ -1,6 +1,7 @@
+import json
 import pytest
 from app import app, db
-from app.models import User
+from app.models import User,FriendRequest
 from werkzeug.security import check_password_hash
 
 def delete_test_data():
@@ -62,5 +63,4 @@ def test_login_unsuccessful(client):
     
     assert login_response.status_code == 200
     assert b'Invalid username or password' in login_response.data
-
 
