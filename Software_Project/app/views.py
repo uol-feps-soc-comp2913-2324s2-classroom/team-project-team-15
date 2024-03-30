@@ -267,7 +267,7 @@ def fetch_friend_requests():
     requests_data = [{'id': req.id, 'username': req.requester.username} for req in incoming_requests]
     return jsonify(requests_data)
 
-@app.route('/respond-friend-request/<int:request_id>/<action>', methods=['POST'])
+@app.route('/respond-friend-request/<request_id>/<action>', methods=['POST'])
 @login_required
 def respond_friend_request(request_id, action):
     friend_request = FriendRequest.query.get_or_404(request_id)
