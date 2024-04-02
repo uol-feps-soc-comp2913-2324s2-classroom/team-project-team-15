@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User GPS Page</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>User GPS Page</h1>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+
+
+
+// const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize map
+            var map = L.map('map').setView([51.505, -0.09], 13); // Default view
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Function to geocode an address and obtain its coordinates
+// Function to geocode an address and obtain its coordinates
+async function geocodeAddress(address) {
+    console.log('Geocoding address:', address);
+    const apiUrl = 'https://nominatim.openstreetmap.org/search';
+    const params = {
+        format: 'json',
+        q: address,
+        addressdetails: 1,
+        polygon: 0,
+        limit: 1
+    };
+
+    try {
+        const response = await fetch(`${apiUrl}?${new URLSearchParams(params)}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch');
+        }
+        const data = await response.json();
+
+        if (data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lng = parseFloat(data[0].lon);
+            console.log('Geocoded coordinates:', [lat, lng]);
+            return [lat, lng];
+        } else {
+            throw new Error('Address not found');
+            return address;
+        }
+    } catch (error) {
+        console.error(`Error geocoding address '${address}':`, error);
+        return null;
+    }
+}
+
+
+            // Function to plot routes on the map
+            // Function to plot routes on the map
+            async function plotRoutes(journeyRecords) {
+    for (let i = 0; i < journeyRecords.length; i++) {
+        const record = journeyRecords[i];
+        const originCoords = await geocodeAddress(record.origin);
+        const destinationCoords = await geocodeAddress(record.destination);
+
+        if (originCoords && destinationCoords) {
+            const waypoints = record.waypoints.split(';').map(wp => wp.trim());
+            const waypointsCoordinates = [];
+
+            if (waypoints.length === 1 && waypoints[0] === '') {
+                // If no waypoints provided, connect origin and destination directly
+                waypointsCoordinates.push(originCoords, destinationCoords);
+            } else {
+                for (const waypoint of waypoints) {
+                    if (waypoint === '') continue; // Skip empty waypoints
+
+                    let coords;
+                    if (waypoint.includes(',')) {
+                        // Coordinate pair (latitude, longitude)
+                        const [lat, lng] = waypoint.split(',').map(coord => parseFloat(coord));
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            coords = [lat, lng];
+                        }
+                    } else {
+                        // Address: Perform geocoding
+                        coords = await geocodeAddress(waypoint);
+                    }
+
+                    if (coords) {
+                        waypointsCoordinates.push(coords);
+                    } else {
+                        console.error(`Failed to geocode address: ${waypoint}`);
+                    }
+                }
+
+                if (waypointsCoordinates.length > 0) {
+                    // Adding origin and destination to waypointsCoordinates array
+                    waypointsCoordinates.unshift(originCoords);
+                    waypointsCoordinates.push(destinationCoords);
+                } else {
+                    console.error('No valid waypoints found for record:', record);
+                    continue; // Skip this record if no valid waypoints found
+                }
+            }
+
+            // Generate color based on the index of the route
+            const hue = (i * 137.5) % 360; // Generate hue based on index
+            const color = `hsl(${hue}, 100%, 50%)`; // Convert hue to HSL color
+
+            // Create polyline and add to map with dynamic color
+            const polyline = L.polyline(waypointsCoordinates, { color: color });
+            polyline.addTo(map);
+
+
+ // Create marker for origin and destination with label
+ L.marker(originCoords).bindPopup(`Origin: ${record.origin}`).addTo(map);
+                        L.marker(destinationCoords).bindPopup(`Destination: ${record.destination}`).addTo(map);
+
+
+        } else {
+            console.error('Failed to geocode origin or destination for record:', record);
+        }
+    }
+}
+
+
+            // Pass journey records data from Flask to JavaScript
+            const journeyRecords = JSON.parse('{{ journeys | tojson | safe }}');
+//             journeyRecords = [
+//     {
+//         "origin": "New York, NY",
+//         "destination": "Los Angeles, CA",
+//         "waypoints": ""
+//     },
+//     {
+//         "origin": "San Francisco, CA",
+//         "destination": "Seattle, WA",
+//         "waypoints": ""
+//     }
+// ]
+            // Plot routes on the map
+            plotRoutes(journeyRecords);
+        });
+    </script>
+
+
+</body>
+</html>

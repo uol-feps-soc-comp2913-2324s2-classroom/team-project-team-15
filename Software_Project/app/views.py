@@ -239,3 +239,21 @@ def gps_page():
     # Fetch all journeys for the current user to display
     journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
     return render_template('index.html', journeys=journeys)
+
+
+
+
+@app.route('/userroute', methods=['GET'])
+@login_required
+def user_route():
+    # Fetch all journeys for the current user to display
+    journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
+    # Serialize JourneyRecord objects to a JSON serializable format
+    serialized_journeys = [{
+        'id': journey.id,
+        'origin': journey.origin,
+        'destination': journey.destination,
+        'waypoints': journey.waypoints,
+        'time_taken': journey.time_taken
+    } for journey in journeys]
+    return render_template('userroute.html', journeys=serialized_journeys)
