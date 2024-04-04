@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<body onload="initMap()">
+
+    <main>
+        <div id="map-container">
+            <div id="map"></div>
+        </div>
+
+        <form method="post" onsubmit="calculateRoute(); return false;">
+            <label for="origin">Origin:</label>
+            <input type="text" id="origin" name="origin" required>
+            <br>
+            <label for="destination">Destination:</label>
+            <input type="text" id="destination" name="destination" required>
+            <br>
+            <div id="waypoints-container">
+                <label for="waypoint1">Waypoint 1:</label>
+                <input type="text" id="waypoint1" class="waypoint-input">
+                <br>
+            </div>
+            <button type="button" onclick="addWaypoint()">Add Waypoint</button>
+            <br>
+            <label for="travel-mode">Travel Mode:</label>
+            <select id="travel-mode" name="travel-mode">
+                <option value="BICYCLING">Cycling</option>
+                <option value="WALKING">Walking</option>
+            </select>
+            <br>
+            <input type="submit" value="Find Route">
+        </form>
+
+        <div id="route-details">
+            <h2 id="total-distance"></h2>
+            <h2 id="total-duration"></h2>
+        </div>
+
+        <div class="journey-buttons">
+            <button id="start-journey-btn" onclick="startJourney()">Start Journey</button>
+            <button id="end-journey-btn" onclick="endJourney()" disabled>End Journey</button>
+        </div>
+    </main>
+</body>
+<!-- Flash messages section -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="flashed-messages">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% endblock %}
