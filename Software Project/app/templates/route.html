@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<body>
+    <div id="map" style="height: 400px; width: 100%;"></div>
+    <button id="startJourney">Start Journey</button>
+    <button id="endJourney">End Journey</button>
+</body>
+
+
+<!-- Flash messages section -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="flashed-messages">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% endblock %}
