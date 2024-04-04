@@ -1,0 +1,10 @@
+{
+    "python.testing.pytestArgs": [
+        "Software_Project"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.analysis.extraPaths": [
+        "./Software_Project"
+    ]
+}

@@ -90,3 +90,4 @@ class RevenueEstimate(db.Model):
     date = db.Column(db.Date, nullable=False)
     total_revenue = db.Column(db.Float, nullable=False)
     calculation_details = db.Column(db.Text)
+
