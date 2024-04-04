@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}
+Friends
+{% endblock %}
+
+{% block body %}
+
+<body>
+    <div class="container">
+        <h1>My Romantic Friends</h1>
+        <div class="search-bar">
+            <input type="text" placeholder="Search...">
+            <select>
+                <option value="all">All</option>
+                <option value="online">Online</option>
+                <option value="offline">Offline</option>
+            </select>
+        </div>
+        <div class="friends-list">
+            <div class="friend-box">
+                <div class="friend-details">
+                    <h2>Name: مهر</h2>
+                    <p>Username: مهر</p>
+                </div>
+                <button class="remove-btn">Remove</button>
+            </div>
+            <div class="friend-box">
+                <div class="friend-details">
+                    <h2>Name: میر</h2>
+                    <p>Username: مهر</p>
+                </div>
+                <button class="remove-btn">Remove</button>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}
+
