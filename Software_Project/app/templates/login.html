@@ -1,39 +1,151 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block title %}
-Login
-{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/base.css')}}">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_IDAXXGAVJYlMrrRt6gpBDhumrkQ-CbY"></script>
 
-{% block body %}
-<div id="login-box">
-    <div id="login-options">
-        <button class="login-option-button" onclick="selectLoginType('user')">User Login</button>
-        <button class="login-option-button" onclick="selectLoginType('employee')">Employee Login</button>
+</head>
+
+<body>
+    <style>
+        .thisLogin {
+            color: white;
+            font-size: 30px;
+        }
+
+        .thisContent {
+            min-height: 682px;
+            contain: content;
+            overflow: hidden;
+
+        }
+
+        .thisOr {
+            color: white;
+            font-size: 15px;
+            margin: 10px;
+        }
+
+        body {
+            background: url("../static/images/registerpage1.png");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 682px;
+        }
+
+        .popup-form {
+            width: 35%;
+            height: 100%;
+            background: none;
+            /* height: 50%; */
+            justify-content: center;
+
+            text-align: center;
+            border-radius: 30px;
+            display: block;
+            /* display: none; */
+            /* contain: content; */
+            position: fixed;
+            top: 70%;
+            left: 70%;
+            transform: translate(-50%, -50%);
+            /* padding: 20px; */
+            /* z-index: 1000; */
+            box-shadow: none;
+        }
+
+        .form-control {
+            width: 92%;
+            outline: none;
+            padding: 12px 20px;
+            border: 1px solid rgb(154, 154, 154);
+            border-radius: 20px;
+            /* margin: 10px; */
+            font-size: 16px;
+            background: #e4e4e4;
+            color: #000;
+        }
+
+        .form-control::placeholder {
+            color: rgb(113, 113, 113);
+        }
+
+        .submitBtn {
+            font-size: 1rem;
+            margin-top: 0.8rem;
+            margin-bottom: 0.6rem;
+            padding: 10px 0;
+            border-radius: 20px;
+            outline: none;
+            border: none;
+            width: 95%;
+            background: #ff6600;
+            color: #fff;
+            cursor: pointer;
+        }
+
+
+        .submitBtn:hover {
+            background: #ff66006a;
+        }
+
+        .member {
+            font-size: 15px;
+        }
+
+        .regisBtn {
+            color: #ff6600;
+            font-size: 18px;
+        }
+    </style>
+    <div class="thisHeader">
+        <h1 id="title">MyRoute</h1>
+        <nav id="navbar">
+            <a href="{{ url_for('index') }}" class="nav-button">Home</a>
+        </nav>
     </div>
-    <form id="login-form" action="{{ url_for('login') }}" method="POST" style="display: block;">
-        <h2>Login Form</h2>
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-            <label for="username" style="margin-right: 10px;">Username:</label>
-            <input type="text" placeholder="Username" id="username" name="username" required>
-        </div>
-        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-            <label for="password" style="margin-right: 10px;">Password:</label>
-            <input type="password" placeholder="Password" id="password" name="password" required>
-        </div>
-        <button type="submit" id="login-button">Login</button>
-    </form>
-    <a href="{{ url_for('register') }}" id="register-button" class="button">Register</a>
-</div>
+    <div class="thisContent">
+        <div id="login-box" class="popup-form">
+            <form id="login-form" action="{{ url_for('login') }}" method="POST" style="display: block;">
+                <h2 class="thisLogin">Login</h2>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input class="form-control" type="text" placeholder="Username" id="username" name="username"
+                        required>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input class="form-control" type="password" placeholder="Password" id="password" name="password"
+                        required>
+                </div>
+                <button type="submit" class="submitBtn">Login</button>
+                <div class="member">
+                    <h2 class="thisOr">Or</h2>
+                </div>
+                <a href="{{ url_for('register') }}" id="register-button" class="button">Register</a>
+            </form>
 
-<!-- Flash messages section -->
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul class="flashed-messages">
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endwith %}
-{% endblock %}
+        </div>
+    </div>
+
+    <!-- Flash messages section -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class="flashed-messages">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+</body>
+
+</html>

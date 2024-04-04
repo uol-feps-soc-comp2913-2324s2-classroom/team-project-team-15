@@ -1,56 +1,203 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block body %}
-<div id="register-box">
-    <h2>Register</h2>
-    <form action="{{ url_for('register') }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/base.css')}}">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_IDAXXGAVJYlMrrRt6gpBDhumrkQ-CbY"></script>
 
-        <div class="form-group">
-            <input type="text" name="username" placeholder="Username" required class="form-control">
+</head>
+
+<body>
+    <style>
+        body {
+            background: url("../static/images/registerpage1.png");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 682px;
+        }
+
+        .thisContent {
+            min-height: 682px;
+            contain: content;
+            overflow: hidden;
+            /* overflow-y: scroll; */
+
+        }
+
+        .loginBtn1 {
+            color: white;
+        }
+
+        .popup-form1 {
+            width: 40%;
+            height: 100%;
+            justify-content: center;
+            background: none;
+            text-align: center;
+            border-radius: 10px;
+            display: block;
+            /* position: fixed;
+            top: 70%; */
+            left: 70%;
+            transform: translate(-50%, -50%);
+            /* padding: 20px; */
+            /* z-index: 1000; */
+            box-shadow: none;
+            margin-bottom: 1%;
+
+
+        }
+
+        .form-control {
+            width: 92%;
+            outline: none;
+            padding: 2% 20px;
+            border: 1px solid rgb(154, 154, 154);
+            border-radius: 20px;
+            /* margin: 1px; */
+            font-size: 90%;
+            background: #e4e4e4;
+            color: #000;
+        }
+
+        .form-control::placeholder {
+            color: rgb(113, 113, 113);
+        }
+
+        .submitBtn {
+            font-size: 1rem;
+            margin-top: 0.8rem;
+            margin-bottom: 0.6rem;
+            padding: 10px 0;
+            border-radius: 20px;
+            outline: none;
+            border: none;
+            width: 100%;
+            background: #ff6600;
+            color: #fff;
+            cursor: pointer;
+        }
+
+
+        .submitBtn:hover {
+            background: #ff66006a;
+        }
+
+        .member {
+            font-size: 15px;
+        }
+
+        .regisBtn {
+            color: #ff6600;
+            font-size: 18px;
+        }
+
+        #register-button {
+            width: 85%;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #5c5c5c;
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #register-button:hover {
+            background-color: #6f6e6e;
+        }
+
+        .registerFont {
+            color: white;
+            font-size: 30px;
+        }
+
+        .member {
+            font-size: 15px;
+            color: white;
+        }
+    </style>
+    <div class="thisHeader">
+        <h1 id="title">MyRoute</h1>
+        <nav id="navbar">
+            <a href="{{ url_for('index') }}" class="nav-button">Home</a>
+        </nav>
+    </div>
+    <div class="thisContent">
+        <div id="register-box" class="popup-form1">
+            <h2 class="registerFont">Register Now</h2>
+            <form action="{{ url_for('register') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input class="form-control" type="text" name="username" placeholder="Username" required
+                        class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <input class="form-control" type="text" name="firstName" placeholder="First Name" required
+                        class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <input class="form-control" type="text" name="surName" placeholder="Surname" required
+                        class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <input class="form-control" type="email" name="email" placeholder="Email" required
+                        class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <input class="form-control" type="text" name="phoneNumber" placeholder="Phone Number"
+                        class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <input class="form-control" type="date" name="dob" placeholder="Date of Birth" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <input class="form-control" type="password" name="password" placeholder="Password" required
+                        class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <input class="form-control" type="password" name="confirm_password" placeholder="Confirm Password"
+                        required class="form-control">
+                </div>
+
+                <button type="submit" class="submitBtn">Register</button>
+                <div class="member">
+                    Already a member? <a class="loginBtn1" href="{{ url_for('login') }}">Login Here</a>
+                </div>
+            </form>
         </div>
-
-        <div class="form-group">
-            <input type="text" name="firstName" placeholder="First Name" required class="form-control">
-        </div>
-
-        <div class="form-group">
-            <input type="text" name="surName" placeholder="Surname" required class="form-control">
-        </div>
-
-        <div class="form-group">
-            <input type="email" name="email" placeholder="Email" required class="form-control">
-        </div>
-
-        <div class="form-group">
-            <input type="text" name="phoneNumber" placeholder="Phone Number" class="form-control">
-        </div>
-
-        <div class="form-group">
-            <input type="date" name="dob" placeholder="Date of Birth" class="form-control">
-        </div>
-
-        <div class="form-group">
-            <input type="password" name="password" placeholder="Password" required class="form-control">
-        </div>
-
-        <div class="form-group">
-            <input type="password" name="confirm_password" placeholder="Confirm Password" required class="form-control">
-        </div>
-
-        <button type="submit" class="submit-button">Register</button>
-    </form>
-</div>
+    </div>
 
 
-<!-- Flash messages section -->
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul class="flashed-messages">
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endwith %}
-{% endblock %}
+
+
+
+    <!-- Flash messages section -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class="flashed-messages">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+</body>
+
+</html>
