@@ -1,33 +1,56 @@
 {% extends "base.html" %}
 
-{% block title %}
-Subscription
+{% block navbar %}
+<nav id="navbar">
+    <a href="{{ url_for('index') }}" class="nav-button">Home</a>
+    <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
+
+</nav>
+{% block navbar %}
+<nav id="navbar">
+    <a href="{{ url_for('index') }}" class="nav-button">Home</a>
+    <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
+
+</nav>
 {% endblock %}
 
 {% block body %}
+<div class="current-subscription-info">
+    {% if current_subscription %}
+    <p>Current Plan: {{ current_subscription.plan_name }}</p>
+    <p>Start Date: {{ current_subscription.start_date }}</p>
+    <p>Expiration Date: {{ current_subscription.expiration_date }}</p>
+    <p>Days Left: {{ current_subscription.days_left }}</p>
+    <p><strong>Auto-Renewal:</strong> {{ 'On' if subscription_details.is_auto_renewal_on else 'Off' }}</p>
+    {% else %}
+    <p>No active subscription.</p>
+    {% endif %}
+</div>
 
-<a href="{{ url_for('logout') }}">Logout</a>
-{% for plan in plans %}
-<div class="plan" id="{{ plan.id }}">
-    <form action="{{ url_for('create_checkout_session') }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% if current_subscription %}
+<form action="{{ url_for('cancel_subscription') }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit">Cancel Subscription at Period End</button>
+</form>
+{% endif %}
+
+<div class="subscription-plans">
+    {% for plan in plans %}
+    <div class="plan">
         <h2>{{ plan.name }}</h2>
         <p class="price">{{ plan.amount }} {{ plan.currency }}</p>
-        <input type="hidden" name="stripe_price_id" value="{{ plan.id }}">
-        <button type="submit">Choose {{ plan.name }}</button>
-    </form>
-</div>
-{% endfor %}
-<!-- Flash messages section -->
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul class="flashed-messages">
-    {% for message in messages %}
-    <li>{{ message }}</li>
+        {% if current_subscription and plan.id == current_subscription.price_id %}
+        <button disabled>Current Plan</button>
+        {% else %}
+        <form action="{{ url_for('create_checkout_session', plan_id=plan.id) }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="stripe_price_id" value="{{ plan.id }}">
+            <button type="submit">Choose {{ plan.plan_name }}</button>
+        </form>
+        {% endif %}
+    </div>
     {% endfor %}
-</ul>
-{% endif %}
-{% endwith %}
+</div>
 
 
 {% endblock %}

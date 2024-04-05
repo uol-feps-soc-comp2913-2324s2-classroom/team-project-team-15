@@ -1,39 +1,186 @@
 {% extends "base.html" %}
 
-{% block title %}
-Friends
-{% endblock %}
-
 {% block body %}
 
 <body>
-    <div class="container">
-        <h1>My Romantic Friends</h1>
-        <div class="search-bar">
-            <input type="text" placeholder="Search...">
-            <select>
-                <option value="all">All</option>
-                <option value="online">Online</option>
-                <option value="offline">Offline</option>
-            </select>
-        </div>
-        <div class="friends-list">
-            <div class="friend-box">
-                <div class="friend-details">
-                    <h2>Name: مهر</h2>
-                    <p>Username: مهر</p>
-                </div>
-                <button class="remove-btn">Remove</button>
-            </div>
-            <div class="friend-box">
-                <div class="friend-details">
-                    <h2>Name: میر</h2>
-                    <p>Username: مهر</p>
-                </div>
-                <button class="remove-btn">Remove</button>
-            </div>
-        </div>
+    <form id="searchForm">
+        <input type="text" name="query" placeholder="Search for usernames...">
+        <input type="submit" value="Search">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    </form>
+    <div id="searchResults">
+        <h2>Search Results</h2>
+        <ul>
+            {% for user in users %}
+            <li>
+                {{ user.firstname }} ({{ user.username }})
+                <button class="send-request" data-user-id="{{ user.id }}">Send Friend Request</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <!-- Friends list section -->
+    <div id="friendsList">
+        <h2>My Friends</h2>
+        <ul>
+            {% for friend in friends %}
+            <li id="friend-{{ friend.id }}">
+                {{ friend.firstname }} ({{ friend.username }})
+                <button class="unfriend-button" data-friend-id="{{ friend.id }}">Unfriend</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="friend-requests">
+        <h2>Incoming Friend Requests</h2>
+        <ul>
+            {% for request in requests %}
+            <li>
+                {{ request.requester.username }} wants to be friends.
+                <button class="respond-request" data-request-id="{{ request.id }}" data-action="accept">Accept</button>
+                <button class="respond-request" data-request-id="{{ request.id }}" data-action="reject">Reject</button>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
 </body>
 {% endblock %}
 
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        function updateSearchResults(htmlContent) {
+            $('#searchResults').html(htmlContent);
+            rebindSendRequestButtons(); // Rebind event handlers right after updating the content
+        }
+
+        function sendFriendRequest(userId, csrfToken) {
+            $.ajax({
+                url: `/send-friend-request/${userId}`,
+                type: 'POST',
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                },
+                success: function (response) {
+                    alert(response.message);
+                },
+                error: function () {
+                    alert('Error sending friend request.');
+                }
+            });
+        }
+
+        function rebindSendRequestButtons() {
+            $('.send-request').off('click').on('click', function () {
+                const userId = $(this).data('user-id');
+                const csrfToken = $('input[name="csrf_token"]').val();
+                sendFriendRequest(userId, csrfToken); // Extracted the AJAX call into a separate function
+            });
+        }
+
+        $('input[name="query"]').on('keyup', function () {
+            var query = $(this).val();
+            var csrfToken = $('input[name="csrf_token"]').val();
+
+            $.ajax({
+                url: '/search-users',
+                type: 'GET',
+                data: { query: query },
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                },
+                success: function (data) {
+                    updateSearchResults(data.html); // This now automatically rebinds the click events
+                },
+                error: function () {
+                    alert('Error searching for users.');
+                }
+            });
+        });
+
+        // Initial bind of the event handlers to ensure they are bound when the page loads
+        rebindSendRequestButtons();
+    });
+
+</script>
+<script>
+    $(document).ready(function () {
+        function fetchAndDisplayFriendRequests() {
+            $.getJSON('/fetch-friend-requests', function (requests) {
+                var listItems = requests.map(function (req) {
+                    return `<li>${req.username} wants to be friends. \
+            <button class="respond-request" data-request-id="${req.id}" data-action="accept">Accept</button> \
+            <button class="respond-request" data-request-id="${req.id}" data-action="reject">Reject</button></li>`;
+                });
+                $('#friendRequestsList').html(listItems.join(''));
+                bindRespondRequestButtons();
+            });
+        }
+
+        function bindRespondRequestButtons() {
+            // This function will be called inside fetchAndDisplayFriendRequests to rebind the events
+            $('.respond-request').off('click').on('click', function () {
+                const requestId = $(this).data('request-id');
+                const action = $(this).data('action');
+                const csrfToken = $('input[name="csrf_token"]').val();
+
+                $.ajax({
+                    url: `/respond-friend-request/${requestId}/${action}`,
+                    method: 'POST',
+                    headers: {
+                        "X-CSRFToken": csrfToken
+                    },
+                    success: function (response) {
+                        alert(response.message);
+                        fetchAndDisplayFriendRequests();  // Refresh the list
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(`Error - Status: ${status}, Error: ${error}`);
+                        alert('There was an error processing your request.');
+                    }
+                });
+            });
+        }
+
+        fetchAndDisplayFriendRequests();  // Initial call to fetch and display friend requests
+    });
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Bind a click event to unfriend buttons
+        $('.unfriend-button').click(function () {
+            // Get the friend ID from the button's data attribute
+            const friendId = $(this).data('friend-id');
+            // Construct the URL for the unfriend request
+            const unfriendUrl = `/unfriend/${friendId}`;
+
+            // Fetch the CSRF token from a hidden input (assumed to be included in your form)
+            const csrfToken = $('input[name="csrf_token"]').val();
+
+            // Send the POST request to the unfriend endpoint
+            $.ajax({
+                url: unfriendUrl,
+                type: 'POST',
+                data: { 'csrf_token': csrfToken },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                },
+                success: function (response) {
+                    // On success, remove the friend item from the list
+                    $(`#friend-${friendId}`).remove();
+                    alert('Friend successfully unfriended.');
+                },
+                error: function (xhr, status, error) {
+                    // Handle errors (e.g., friend not found, not authenticated)
+                    console.error('Failed to unfriend:', status, error);
+                    alert('Failed to unfriend. Please try again.');
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

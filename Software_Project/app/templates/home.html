@@ -1,116 +1,151 @@
 {% extends "base.html" %}
 
-{% block title %}
-Index
-{% endblock %}
 
 {% block body %}
 
-<body>
-    <header>
-        <div class="container">
-            <img src="your-logo.png" alt="Your App Logo" class="logo">
-            <nav>
-                <a href="#section1">Features</a>
-                <a href="#section2">Pricing</a>
-                <a href="#section3">Contact</a>
-                <button>Login</button>
-                <button>Sign Up</button>
-            </nav>
+<body class="adminBody">
+    <div class="contents">
+        <div class="content-box">
+            <h2>Navigate Your Fitness Journey</h2>
+            <h3>Explore. Track. Conquer.</h3>
+            <a href="{{ url_for('login') }}" class="nav-button4">Start Now</a>
         </div>
-    </header>
-
-    <main>
-        <section id="section1">
-            <div class="container">
+    </div>
+    <div class="most-rated">
+        <div class="most-rated-box">
+            <div class="most-rated-title">
                 <h2>Features</h2>
-                <div class="features">
-                    <div class="feature">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <h3>Track Your Routes</h3>
-                        <p>Monitor your progress and explore new routes.</p>
+            </div>
+
+            <div class="most-rated-items">
+                <div class="most-rated-item">
+                    <div class="most-rated-image">
+                        <img src="{{ url_for('static', filename='images/track.png') }}">
                     </div>
-                    <div class="feature">
-                        <i class="fas fa-heartbeat"></i>
-                        <h3>Stay Healthy</h3>
-                        <p>Keep track of your workouts and improve your fitness.</p>
+                    <div class="most-rated-body">
+                        <h4>Track Your Routes</h4>
+                        <p>Monitor your progress </p>
+                        <p>and explore new routes.</p>
                     </div>
-                    <div class="feature">
-                        <i class="fas fa-medal"></i>
-                        <h3>Compete with Friends</h3>
-                        <p>Challenge your friends and compare achievements.</p>
+                </div>
+                <div class="most-rated-item">
+                    <div class="most-rated-image">
+                        <img src="{{ url_for('static', filename='images/healthy.png') }}">
+                    </div>
+                    <div class="most-rated-body">
+                        <h4>Stay Healthy</h4>
+                        <p>Keep track of your workouts</p>
+                        <p>and improve your fitness</p>
+                    </div>
+                </div>
+                <div class="most-rated-item">
+                    <div class="most-rated-image">
+                        <img src="{{ url_for('static', filename='images/friends.png') }}">
+                    </div>
+                    <div class="most-rated-body">
+                        <h4>Compete with Friends</h4>
+                        <p>Challenge your friends</p>
+                        <p>and compare achievements.</p>
                     </div>
                 </div>
             </div>
-        </section>
-        <section id="section2" class="pricing-section">
-            <div class="container">
-                <h2>Pricing</h2>
-                <div class="pricing-plans">
-                    <div class="pricing-plan">
-                        <h3>Weekly</h3>
-                        <p>$0<span>/month</span></p>
-                        <ul>
-                            <li>Track Routes</li>
-                            <li>Basic Stats</li>
-                            <li>Limited Challenges</li>
-                        </ul>
-                        <button>Choose Plan</button>
-                    </div>
-                    <div class="pricing-plan">
-                        <h3>Monthly</h3>
-                        <p>$14.99<span>/month</span></p>
-                        <ul>
-                            <li>Advanced Features</li>
-                            <li>Full Stats</li>
-                            <li>Unlimited Challenges</li>
-                        </ul>
-                        <button>Choose Plan</button>
-                    </div>
-                    <div class="pricing-plan">
-                        <h3>Annual</h3>
-                        <p>$9.99<span>/month</span></p>
-                        <ul>
-                            <li>Track Routes</li>
-                            <li>Basic Stats</li>
-                            <li>Limited Challenges</li>
-                        </ul>
-                        <button>Choose Plan</button>
-                    </div>
+
+        </div>
+    </div>
+
+    <div class="our-services">
+        <div class="most-rated-title">
+            <h2>Pricing</h2>
+        </div>
+        <div class="our-services-box">
+
+            <div class="our-services-item">
+                <div class="our-services-icon">
+                    <h5 class="thisPrice">£2.99</h5>
+                </div>
+                <div class="our-services-body">
+                    <h3>Weekly</h3>
+                    <ul class="thisul">
+                        <li>This is sentence 1.</li>
+                        <li>This is sentence 2.</li>
+                        <li>This is sentence 3.</li>
+                    </ul>
+                    <a href="{{ url_for('register') }}" class="nav-button3">Sign Up</a>
                 </div>
             </div>
-        </section>
-        <section id="section3" class="contact-section">
-            <div class="container">
-                <h2>Contact</h2>
-                <p>Get in touch with us for any inquiries or feedback.</p>
-                <form>
-                    <input type="text" placeholder="Your Name">
-                    <input type="email" placeholder="Your Email">
-                    <textarea placeholder="Your Message"></textarea>
-                    <button>Send Message</button>
-                </form>
+
+            <div class="our-services-item">
+                <div class="our-services-icon">
+                    <h5 class="thisPrice">£12.99</h5>
+                </div>
+                <div class="our-services-body">
+                    <h3>Monthly</h3>
+                    <ul class="thisul">
+                        <li>This is sentence 1.</li>
+                        <li>This is sentence 2.</li>
+                        <li>This is sentence 3.</li>
+                    </ul>
+                    <a href="{{ url_for('register') }}" class="nav-button3">Sign Up</a>
+                </div>
             </div>
-        </section>
+
+            <div class="our-services-item">
+                <div class="our-services-icon">
+                    <h5 class="thisPrice">£99.99</h5>
+                </div>
+                <div class="our-services-body">
+                    <h3>Annually</h3>
+                    <ul class="thisul">
+                        <li>This is sentence 1.</li>
+                        <li>This is sentence 2.</li>
+                        <li>This is sentence 3.</li>
+                    </ul>
+                    <a href="{{ url_for('register') }}" class="nav-button3">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="footer">
+        <div class="footer-box">
+            <div class="footer-i f1">
+                <h4>Contact</h4>
+                <label>Street: Woodhouse lane</label><br>
+                <label>City: Leeds</label><br>
+                <label>PostCode: LS6 2PG</label><br>
+                <label>Phone Number: 8437879389</label><br>
+            </div>
+            <div class="footer-i f2">
+                <h4>Visit Us</h4>
+                <label>Getting Here</label><br>
+                <label>Our Supporters</label><br>
+                <label>Staff Directory</label><br>
+                <label>Current Season</label><br>
+            </div>
+            <div class="footer-i f3">
+                <h4>Contact</h4>
+                <label>skjdh jksahdjhsd</label><br>
+                <label>jsdhshjd jaskdjs</label><br>
+                <label>jlhsdjkdn dsdns</label><br>
+                <label>jhrjhjndfjasn asnd</label><br>
+            </div>
+            <div class="footer-i f4">
+                <h4>Contact</h4>
+                <label>skjdh jksahdjhsd</label>
+                <label>jsdhshjd jaskdjs</label>
+                <label>jlhsdjkdn dsdns</label>
+                <input type="text" placeholder="Email Address">
+                <button>></button>
+            </div>
+        </div>
+    </div>
+
     </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 Your Company. All rights reserved.</p>
-        </div>
-    </footer>
+
 
     <script src="scripts.js"></script>
 </body>
 
-<!-- Flash messages section -->
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul class="flashed-messages">
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endwith %}
 {% endblock %}

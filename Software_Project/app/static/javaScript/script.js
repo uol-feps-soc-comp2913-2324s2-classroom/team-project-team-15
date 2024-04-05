@@ -219,6 +219,68 @@ function SignUp() {
     });
 }
 
+
+function formatDuration(seconds) {
+    var hours = Math.floor(seconds / 3600);
+    var minutes = Math.floor((seconds % 3600) / 60);
+    var remainingSeconds = seconds % 60;
+    var formattedDuration = hours + " hour(s) " + minutes + " minute(s) " + remainingSeconds + " second(s)";
+    return formattedDuration;
+}
+
+const revenueData = JSON.parse('{{ revenue_data | tojson | safe }}');
+const labels = revenueData.map(item => item[0]);
+const data = revenueData.map(item => item[1]);
+// Create the chart
+const ctx = document.getElementById('lineChart').getContext('2d');
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Weekly Revenue Projection',
+            data: data,
+            borderColor: 'orange',
+            backgroundColor: 'rgba(0, 0, 255, 0.1)',
+        }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Weeks'
+                }
+            }],
+            yAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Revenue'
+                }
+            }]
+        }
+    }
+});
+
+
+function editRow2() {
+    const form = document.getElementById("popupForm4");
+    const overlay = document.getElementById("overlay4");
+    const closeFormButton = document.getElementById("closeForm");
+
+
+
+    // Displaying the form, overlay
+    form.style.display = "block";
+    overlay.style.display = "block";
+
+    // If close button is clicked, the form, overlay should disappear
+    closeFormButton.addEventListener("click", function () {
+        form.style.display = "none";
+        overlay.style.display = "none";
+    });
+}
+
 function uploadGPX() {
     const fileInput = document.getElementById('gpxFile');
     if (fileInput.files.length > 0) {
