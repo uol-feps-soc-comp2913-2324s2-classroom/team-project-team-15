@@ -6,6 +6,12 @@
     <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
 
 </nav>
+{% block navbar %}
+<nav id="navbar">
+    <a href="{{ url_for('index') }}" class="nav-button">Home</a>
+    <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
+
+</nav>
 {% endblock %}
 
 {% block body %}

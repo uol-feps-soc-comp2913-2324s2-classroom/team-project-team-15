@@ -30,38 +30,7 @@ def create_stripe_customer(user):
 @app.route('/', methods=['GET'])
 def index():
     return render_template('home.html')
-
-@app.route('/validate-form', methods=['POST'])
-def validate_form():
-    data = request.get_json()
-    errors = {}
-
-    # Validate username
-    if 'username' in data:
-        if User.query.filter_by(username=data['username']).first():
-            errors['username_error'] = 'Username already taken. Please choose a different username.'
-
-    # Validate email
-    if 'email' in data:
-        if User.query.filter_by(email=data['email']).first():
-            errors['email_error'] = 'Email already registered. Please use a different email.'
-
-    # Validate phone number
-    if 'phoneNumber' in data:
-        if User.query.filter_by(phone_number=data['phoneNumber']).first():
-            errors['phoneNumber_error'] = 'Phone number already registered. Please use a different phone number.'
-
-    # Validate password
-    if 'password' in data:
-        password = data['password']
-        if not any(char.isdigit() for char in password) or len(password) < 8:
-            errors['password_error'] = 'Password must contain at least one number and be at least 8 characters long.'
-
-    # Validate confirm password
-    if 'confirmPassword' in data and 'password' in data:
-        if data['password'] != data['confirmPassword']:
-            errors['confirmPassword_error'] = 'Passwords do not match.'
-    return jsonify(errors)        
+        
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -479,6 +448,16 @@ def unfriend(user_id, friend_id):
         return True
     return False
 
+
+@app.route('/unfriend/<int:friend_id>', methods=['POST'])
+@login_required
+def handle_unfriend(friend_id):
+    result = unfriend(current_user.id, friend_id)
+    
+    if result:
+        return jsonify({'message': 'Friend successfully unfriended.'}), 200
+    else:
+        return jsonify({'error': 'Could not unfriend the specified user.'}), 400
 
 @app.route('/unfriend/<int:friend_id>', methods=['POST'])
 @login_required
