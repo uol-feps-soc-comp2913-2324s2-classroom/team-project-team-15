@@ -86,8 +86,8 @@
                     <li><span>Date of Birth:</span> {{ current_user.dob }}</li>
                     <li><span>Email:</span> {{ current_user.email }}</li>
                     <li><span>Phone Number:</span> {{ current_user.phone_number }}</li>
-                    <li><span>Subscription Plan:</span> Monthly<button id="Btn1" class="btn btn-primary ml-3"
-                            onclick="SubBox()">Change</button></li>
+                    <li><span>Subscription Plan:</span> {{ subscription_plan_name }}<button id="Btn1"
+                            class="btn btn-primary ml-3" onclick="SubBox()">Change</button></li>
                 </ul>
             </div>
         </div>

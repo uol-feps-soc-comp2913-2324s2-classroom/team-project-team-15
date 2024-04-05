@@ -24,7 +24,10 @@
         <h2>My Friends</h2>
         <ul>
             {% for friend in friends %}
-            <li>{{ friend.firstname }} ({{ friend.username }})</li>
+            <li id="friend-{{ friend.id }}">
+                {{ friend.firstname }} ({{ friend.username }})
+                <button class="unfriend-button" data-friend-id="{{ friend.id }}">Unfriend</button>
+            </li>
             {% endfor %}
         </ul>
     </div>
@@ -144,4 +147,40 @@
         fetchAndDisplayFriendRequests();  // Initial call to fetch and display friend requests
     });
 </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Bind a click event to unfriend buttons
+        $('.unfriend-button').click(function () {
+            // Get the friend ID from the button's data attribute
+            const friendId = $(this).data('friend-id');
+            // Construct the URL for the unfriend request
+            const unfriendUrl = `/unfriend/${friendId}`;
+
+            // Fetch the CSRF token from a hidden input (assumed to be included in your form)
+            const csrfToken = $('input[name="csrf_token"]').val();
+
+            // Send the POST request to the unfriend endpoint
+            $.ajax({
+                url: unfriendUrl,
+                type: 'POST',
+                data: { 'csrf_token': csrfToken },
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                },
+                success: function (response) {
+                    // On success, remove the friend item from the list
+                    $(`#friend-${friendId}`).remove();
+                    alert('Friend successfully unfriended.');
+                },
+                error: function (xhr, status, error) {
+                    // Handle errors (e.g., friend not found, not authenticated)
+                    console.error('Failed to unfriend:', status, error);
+                    alert('Failed to unfriend. Please try again.');
+                }
+            });
+        });
+    });
+</script>
+
 {% endblock %}

@@ -1,14 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}
-Route
-{% endblock %}
 
 {% block head %}
 
 {% endblock %}
 
 {% block body %}
+
 <head>
     <!-- Include Leaflet Control Geocoder CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
@@ -55,7 +53,7 @@ Route
     <!-- Include Leaflet Control Geocoder JavaScript -->
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <!-- Include your script.js file -->
-    <script src="<script src="{{ url_for('static', filename='javascript/script.js') }}"></script>
+    <script src="<script src=" {{ url_for('static', filename='javascript/script.js' ) }}"></script>
     "></script>
 
 </body>
