@@ -1272,3 +1272,13 @@ nav#navbar {
     max-width: 90%;
     /* Ensure it doesn't stretch too wide */
 }
+
+button:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+}
