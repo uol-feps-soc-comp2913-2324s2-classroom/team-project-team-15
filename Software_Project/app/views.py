@@ -182,6 +182,8 @@ def choose_subscription():
             'is_auto_renewal_on': not subscription.cancel_at_period_end,
         }         
 
+        
+
     return render_template('choose_subscription.html', plans=plans, current_subscription=current_subscription,subscription_details=subscription_details)
 
 @app.route('/create_checkout_session', methods=['POST'])
