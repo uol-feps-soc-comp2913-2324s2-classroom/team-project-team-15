@@ -459,15 +459,6 @@ def handle_unfriend(friend_id):
     else:
         return jsonify({'error': 'Could not unfriend the specified user.'}), 400
 
-@app.route('/unfriend/<int:friend_id>', methods=['POST'])
-@login_required
-def handle_unfriend(friend_id):
-    result = unfriend(current_user.id, friend_id)
-    
-    if result:
-        return jsonify({'message': 'Friend successfully unfriended.'}), 200
-    else:
-        return jsonify({'error': 'Could not unfriend the specified user.'}), 400
 
 @app.route('/friends')
 @login_required
