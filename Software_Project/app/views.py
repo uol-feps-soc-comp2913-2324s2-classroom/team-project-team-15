@@ -1,5 +1,6 @@
 import json
 from operator import or_
+import re
 from flask import render_template, redirect, url_for, flash, request,session,jsonify, current_app
 from app import app, db
 from app.models import SubscriptionPlan, User,Payment, FriendRequest, JourneyRecord
@@ -11,7 +12,7 @@ from werkzeug.security import check_password_hash
 from collections import defaultdict
 import stripe
 import logging
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 stripe.api_key = 'sk_test_51OubkTGiwWWmEjuUTmrjuRowLjdmFXb365kmtoD0YRLYf7rYKIVhFBIEwn3ozE4O1TMSIqcHa9WIk07RcbIqfErC00DyV65frs'
 
 def create_stripe_customer(user):
@@ -30,6 +31,37 @@ def create_stripe_customer(user):
 def index():
     return render_template('home.html')
 
+@app.route('/validate-form', methods=['POST'])
+def validate_form():
+    data = request.get_json()
+    errors = {}
+
+    # Validate username
+    if 'username' in data:
+        if User.query.filter_by(username=data['username']).first():
+            errors['username_error'] = 'Username already taken. Please choose a different username.'
+
+    # Validate email
+    if 'email' in data:
+        if User.query.filter_by(email=data['email']).first():
+            errors['email_error'] = 'Email already registered. Please use a different email.'
+
+    # Validate phone number
+    if 'phoneNumber' in data:
+        if User.query.filter_by(phone_number=data['phoneNumber']).first():
+            errors['phoneNumber_error'] = 'Phone number already registered. Please use a different phone number.'
+
+    # Validate password
+    if 'password' in data:
+        password = data['password']
+        if not any(char.isdigit() for char in password) or len(password) < 8:
+            errors['password_error'] = 'Password must contain at least one number and be at least 8 characters long.'
+
+    # Validate confirm password
+    if 'confirmPassword' in data and 'password' in data:
+        if data['password'] != data['confirmPassword']:
+            errors['confirmPassword_error'] = 'Passwords do not match.'
+    return jsonify(errors)        
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -64,7 +96,6 @@ def register():
         else:
             flash('Failed to create a Stripe customer account. Please try again.')        
     return render_template('register.html', title='Register', form=form)
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -156,9 +187,33 @@ def get_stripe_plans():
         return []
 
 @app.route('/choose_subscription', methods=['GET'])
+@login_required
 def choose_subscription():
     plans = get_stripe_plans()
-    return render_template('choose_subscription.html', plans=plans)
+   # Fetch the current user's subscription details
+    current_subscription = None
+    if current_user.subscription_plan_id:
+        subscription_plan = SubscriptionPlan.query.get(current_user.subscription_plan_id)
+        if subscription_plan:
+            current_subscription = {
+                'plan_id': subscription_plan.id,
+                'plan_name': subscription_plan.plan_name,
+                'start_date': current_user.subscription_start_date,
+                'expiration_date': subscription_plan.expiration_date, 
+                'price_id':subscription_plan.stripe_price_id,
+                'days_left': (subscription_plan.expiration_date - date.today()).days if subscription_plan.expiration_date else None
+            }
+
+    user = User.query.get(current_user.id)        
+    subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id, status='active', limit=1)
+    subscription_details = None
+    if subscriptions.data:
+        subscription = subscriptions.data[0]
+        subscription_details = {
+            'is_auto_renewal_on': not subscription.cancel_at_period_end,
+        }         
+
+    return render_template('choose_subscription.html', plans=plans, current_subscription=current_subscription,subscription_details=subscription_details)
 
 @app.route('/create_checkout_session', methods=['POST'])
 @login_required
@@ -257,6 +312,62 @@ def payment_cancel():
     flash('Payment was canceled.', 'warning')
     return redirect(url_for('index'))
 
+@app.route('/cancel_subscription', methods=['POST'])
+@login_required
+def cancel_subscription():
+    user = User.query.get(current_user.id)
+    if not user or not user.stripe_customer_id:
+        flash('You do not have an active subscription.', 'error')
+        return redirect(url_for('index'))
+
+    try:
+
+        subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id)
+        subscription_id = None
+        for subscription in subscriptions.auto_paging_iter():
+            # Assuming you store the Stripe Price ID in subscription_plan.stripe_price_id
+            if subscription['items']['data'][0]['price']['id'] == user.subscription_plan.stripe_price_id:
+                subscription_id = subscription['id']
+                break
+        
+        if not subscription_id:
+            flash('No active subscription found for cancellation.', 'error')
+            return redirect(url_for('index'))
+        
+        # Cancel the subscription at period's end
+        stripe.Subscription.modify(
+            subscription_id,
+            cancel_at_period_end=True
+        )
+
+        # Update your models as necessary
+        db.session.commit()
+
+        flash('Your subscription will be cancelled at the end of the current billing period.', 'success')
+    except Exception as e:
+        flash(f'An error occurred while cancelling your subscription: {e}', 'error')
+
+    return redirect(url_for('index'))
+
+@app.context_processor
+def inject_subscription_details():
+    details = {
+        'subscription_plan_name': 'Not Logged In',
+        'stripe_customer_id': None,
+        'stripe_price_id': None
+    }
+
+    if current_user.is_authenticated:
+        user = User.query.get(current_user.id)
+        if user.subscription_plan:
+            details['subscription_plan_name'] = user.subscription_plan.plan_name
+            details['stripe_customer_id'] = user.stripe_customer_id
+            details['stripe_price_id'] = user.subscription_plan.stripe_price_id
+        else:
+            details['subscription_plan_name'] = 'No Subscription'
+    
+    return details
+
 @app.route('/search-users', methods=['GET'])
 @login_required
 def search_users():
@@ -283,14 +394,27 @@ def send_friend_request(requestee_id):
     # Prevent self-friend requests
     if current_user.id == requestee_id:
         return jsonify({'error': 'Cannot send friend request to yourself'}), 400
+    
+    potential_friend = User.query.get(requestee_id)
+    if potential_friend in current_user.friends:
+        return jsonify({'error': 'This user is already your friend.'}), 400
 
     # Check for existing friend request
-    existing_request = FriendRequest.query.filter_by(
+    existing_requestOut = FriendRequest.query.filter_by(
         requester_id=current_user.id, 
         requestee_id=requestee_id
     ).first()
-    if existing_request:
-        return jsonify({'error': 'Friend request already sent'}), 400
+    if existing_requestOut:
+        error_message = 'Friend request already sent.'
+        return jsonify({'error': error_message}), 400
+    
+    existing_requestIn = FriendRequest.query.filter_by(
+        requester_id=requestee_id,
+        requestee_id=current_user.id
+    ).first()
+    if existing_requestIn:
+        error_message = 'User has already sent you a friend request.'
+        return jsonify({'error': error_message}), 400
     
     try:
         # Create and save the new friend request
@@ -331,9 +455,11 @@ def respond_friend_request(request_id, action):
         requester.friends.append(requestee)
         requestee.friends.append(requester)
 
-        friend_request.status = 'accepted'  # Optionally, you could delete the request
+        friend_request.status = 'accepted'
+        db.session.delete(friend_request) 
     elif action == 'reject':
-        friend_request.status = 'rejected'  # Or delete the request
+        friend_request.status = 'rejected' 
+        db.session.delete(friend_request)  
     else:
         return jsonify({'error': 'Invalid action.'}), 400
 
@@ -342,7 +468,7 @@ def respond_friend_request(request_id, action):
 
 
 
-def remove_friend(user_id, friend_id):
+def unfriend(user_id, friend_id):
     user = User.query.get(user_id)
     friend = User.query.get(friend_id)
 
@@ -353,6 +479,16 @@ def remove_friend(user_id, friend_id):
         return True
     return False
 
+
+@app.route('/unfriend/<int:friend_id>', methods=['POST'])
+@login_required
+def handle_unfriend(friend_id):
+    result = unfriend(current_user.id, friend_id)
+    
+    if result:
+        return jsonify({'message': 'Friend successfully unfriended.'}), 200
+    else:
+        return jsonify({'error': 'Could not unfriend the specified user.'}), 400
 
 @app.route('/friends')
 @login_required

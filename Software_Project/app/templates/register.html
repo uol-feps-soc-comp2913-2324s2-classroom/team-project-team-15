@@ -1,16 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/base.css')}}">
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://js.stripe.com/v3/"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_IDAXXGAVJYlMrrRt6gpBDhumrkQ-CbY"></script>
+{% block navbar %}
+<nav id="navbar">
+    <a href="{{ url_for('index') }}" class="nav-button">Home</a>
+</nav>
+{% endblock %}
 
-</head>
+
+{% block body %}
 
 <body>
     <style>
@@ -124,22 +121,28 @@
             font-size: 15px;
             color: white;
         }
+
+        .error {
+            color: red;
+            display: none;
+            /* Initially hide the error message */
+        }
+
+        .error-input {
+            border-color: red;
+            /* Optional: Adds a red border to input fields on error */
+        }
     </style>
-    <div class="thisHeader">
-        <h1 id="title">MyRoute</h1>
-        <nav id="navbar">
-            <a href="{{ url_for('index') }}" class="nav-button">Home</a>
-        </nav>
-    </div>
     <div class="thisContent">
         <div id="register-box" class="popup-form1">
             <h2 class="registerFont">Register Now</h2>
             <form action="{{ url_for('register') }}" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                    <input class="form-control" type="text" name="username" placeholder="Username" required
-                        class="form-control">
+                <div class="form-group">
+                    <input class="form-control" id="username" type="text" name="username" placeholder="Username"
+                        required>
+                    <div id="username-error" class="error"></div>
                 </div>
 
                 <div class="form-group">
@@ -153,13 +156,15 @@
                 </div>
 
                 <div class="form-group">
-                    <input class="form-control" type="email" name="email" placeholder="Email" required
+                    <input class="form-control" id="email" type="email" name="email" placeholder="Email" required
                         class="form-control">
+                    <div id="email-error" class="error"></div>
                 </div>
 
                 <div class="form-group">
                     <input class="form-control" type="text" name="phoneNumber" placeholder="Phone Number"
                         class="form-control">
+                    <div id="phoneNumber-error" class="error"></div>
                 </div>
 
                 <div class="form-group">
@@ -167,13 +172,15 @@
                 </div>
 
                 <div class="form-group">
-                    <input class="form-control" type="password" name="password" placeholder="Password" required
-                        class="form-control">
+                    <input class="form-control" id="password" type="password" name="password" placeholder="Password"
+                        required class="form-control">
+                    <div id="password-error" class="error"></div>
                 </div>
 
                 <div class="form-group">
-                    <input class="form-control" type="password" name="confirm_password" placeholder="Confirm Password"
-                        required class="form-control">
+                    <input class="form-control" id="confirm_password" type="password" name="confirm_password"
+                        placeholder="Confirm Password" required class="form-control">
+                    <div id="confirmPassword-error" class="error"></div>
                 </div>
 
                 <button type="submit" class="submitBtn">Register</button>
@@ -185,19 +192,5 @@
     </div>
 
 
-
-
-
-    <!-- Flash messages section -->
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul class="flashed-messages">
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
 </body>
-
-</html>
+{% endblock %}

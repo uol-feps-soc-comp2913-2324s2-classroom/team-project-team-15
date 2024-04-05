@@ -9,6 +9,45 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_IDAXXGAVJYlMrrRt6gpBDhumrkQ-CbY"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <!-- Centered overlay container -->
+    <div class="overlay-container" id="overlayContainer">
+        <!-- Flash message modal code here -->
+        <div class="flash-modal" id="flashModal">
+            {% for message in messages %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Show the overlay and modal
+            $('#overlayContainer').css('visibility', 'visible');
+            $('#flashModal').fadeIn();
+
+            // Automatically close modal and hide overlay after 3 seconds
+            setTimeout(function () {
+                $('#flashModal').fadeOut(function () {
+                    // Hide the overlay and restore scrolling
+                    $('#overlayContainer').css('visibility', 'hidden');
+                    $('body').css('overflow', 'auto');
+                });
+            }, 3000);
+        });
+    </script>
+
+    {% endif %}
+    {% endwith %}
     {% block head %}{% endblock %}
 </head>
 
@@ -18,6 +57,7 @@
         {% if current_user.is_authenticated %}
         {% else %}
         {% endif %}
+        {% block navbar %}
         <nav id="navbar">
             {% if current_user.is_authenticated %}
             <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
@@ -26,6 +66,7 @@
             <a href="{{ url_for('register') }}" class="nav-button2">Sign Up</a>
             {% endif %}
         </nav>
+        {% endblock %}
     </div>
 
     <div class="overlay1" id="overlay1"></div>
@@ -45,8 +86,8 @@
                     <li><span>Date of Birth:</span> {{ current_user.dob }}</li>
                     <li><span>Email:</span> {{ current_user.email }}</li>
                     <li><span>Phone Number:</span> {{ current_user.phone_number }}</li>
-                    <li><span>Subscription Plan:</span> Monthly<button id="Btn1" class="btn btn-primary ml-3"
-                            onclick="SubBox()">Change</button></li>
+                    <li><span>Subscription Plan:</span> {{ subscription_plan_name }}<button id="Btn1"
+                            class="btn btn-primary ml-3" onclick="SubBox()">Change</button></li>
                 </ul>
             </div>
         </div>
@@ -115,6 +156,7 @@
 
     <script src="{{ url_for('static',filename='javascript/script.js')}}"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
     {% block body %}{% endblock %}
 
