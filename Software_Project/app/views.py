@@ -510,10 +510,6 @@ def friends():
 
     return render_template('friends.html', friends=friends, requests=incoming_requests)
 
-@app.route('/friendsProfile', methods=['GET', 'POST'])
-@login_required
-def friendsProfile():
-    return render_template('friendsprofile.html')
 
 @app.route('/add-journey', methods=['POST'])
 def add_journey():
