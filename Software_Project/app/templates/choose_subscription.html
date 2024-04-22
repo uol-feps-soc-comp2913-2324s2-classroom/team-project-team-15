@@ -6,12 +6,6 @@
     <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
 
 </nav>
-{% block navbar %}
-<nav id="navbar">
-    <a href="{{ url_for('index') }}" class="nav-button">Home</a>
-    <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
-
-</nav>
 {% endblock %}
 
 {% block body %}
@@ -22,6 +16,10 @@
     <p>Expiration Date: {{ current_subscription.expiration_date }}</p>
     <p>Days Left: {{ current_subscription.days_left }}</p>
     <p><strong>Auto-Renewal:</strong> {{ 'On' if subscription_details.is_auto_renewal_on else 'Off' }}</p>
+    <form action="{{ url_for('enable_auto_renewal') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-primary">Enable Auto-Renewal</button>
+    </form>
     {% else %}
     <p>No active subscription.</p>
     {% endif %}
@@ -45,7 +43,11 @@
         <form action="{{ url_for('create_checkout_session', plan_id=plan.id) }}" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="stripe_price_id" value="{{ plan.id }}">
+            {% if current_subscription %}
+            <button type="submit">Change to {{ plan.plan_name }}</button>
+            {% else %}
             <button type="submit">Choose {{ plan.plan_name }}</button>
+            {% endif %}
         </form>
         {% endif %}
     </div>
