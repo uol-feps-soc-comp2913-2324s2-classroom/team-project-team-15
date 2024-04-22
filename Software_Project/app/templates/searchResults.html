@@ -7,8 +7,8 @@
         <ul>
             {% for user in users %}
             <li>
-                {{ user.firstname }} ({{ user.username }})
-                <button class="send-request" data-user-id="{{ user.id }}">Send Friend Request</button>
+                {{ user.username }}
+                <button class="send-request" data-user-id="{{ user.id }}">Request</button>
             </li>
             {% endfor %}
         </ul>

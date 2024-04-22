@@ -16,6 +16,10 @@
     <p>Expiration Date: {{ current_subscription.expiration_date }}</p>
     <p>Days Left: {{ current_subscription.days_left }}</p>
     <p><strong>Auto-Renewal:</strong> {{ 'On' if subscription_details.is_auto_renewal_on else 'Off' }}</p>
+    <form action="{{ url_for('enable_auto_renewal') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-primary">Enable Auto-Renewal</button>
+    </form>
     {% else %}
     <p>No active subscription.</p>
     {% endif %}

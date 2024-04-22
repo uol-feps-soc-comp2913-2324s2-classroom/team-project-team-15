@@ -186,6 +186,44 @@ def choose_subscription():
 
     return render_template('choose_subscription.html', plans=plans, current_subscription=current_subscription,subscription_details=subscription_details)
 
+@app.route('/enable_auto_renewal', methods=['POST'])
+@login_required
+def enable_auto_renewal():
+    user = User.query.get(current_user.id)
+    if not user or not user.stripe_customer_id:
+        flash('You do not have an active subscription.', 'error')
+        return redirect(url_for('index'))
+
+    try:
+
+        subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id)
+        subscription_id = None
+        for subscription in subscriptions.auto_paging_iter():
+            # Assuming you store the Stripe Price ID in subscription_plan.stripe_price_id
+            if subscription['items']['data'][0]['price']['id'] == user.subscription_plan.stripe_price_id:
+                subscription_id = subscription['id']
+                break
+        
+        if not subscription_id:
+            flash('No active subscription found for cancellation.', 'error')
+            return redirect(url_for('index'))
+        
+        # Cancel the subscription at period's end
+        stripe.Subscription.modify(
+            subscription_id,
+            cancel_at_period_end=False
+        )
+
+        # Update your models as necessary
+        db.session.commit()
+
+        flash('Your subscription will be automatically renewed at the end of the current billing period.', 'success')
+    except Exception as e:
+        flash(f'An error occurred while Enabling Auto-Renewal your subscription: {e}', 'error')
+
+    return redirect(url_for('index'))
+        
+
 @app.route('/create_checkout_session', methods=['POST'])
 @login_required
 def create_checkout_session():
