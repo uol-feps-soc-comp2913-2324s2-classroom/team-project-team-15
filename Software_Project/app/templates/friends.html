@@ -16,8 +16,8 @@
         <div class="mainWhite">
             <div class="friendsNav">
                 <button class="fNavBtn" id="btn1" onclick="windowOpen1()">Search</button>
-                <button class="fNavBtn"  onclick="windowOpen2()">My Friends</button>
-                <button class="fNavBtn"  onclick="windowOpen3()">Requests</button>
+                <button class="fNavBtn" onclick="windowOpen2()">My Friends</button>
+                <button class="fNavBtn" onclick="windowOpen3()">Requests</button>
             </div>
             <div class="searchFriend" style="display: none;" id="window1">
                 <div class="topSearch">
@@ -33,11 +33,17 @@
                         {% for user in users %}
                         <li>
                             {{ user.username }}
+                            {% if user.is_friend %}
+                            <button disabled>Already Friends</button>
+                            {% elif user.can_cancel %}
+                            <button class="cancel-request" data-user-id="{{ user.id }}">Cancel Request</button>
+                            {% else %}
                             <button class="send-request" data-user-id="{{ user.id }}">Request</button>
+                            {% endif %}
                         </li>
                         {% endfor %}
-
                     </ul>
+
                 </div>
             </div>
 
@@ -63,8 +69,10 @@
                         {% for request in requests %}
                         <li>
                             {{ request.requester.username }} wants to be friends.
-                            <button class="respond-request" data-request-id="{{ request.id }}" data-action="accept">Accept</button>
-                            <!-- <button class="respond-request" data-request-id="{{ request.id }}" data-action="reject">Reject</button> -->
+                            <button class="respond-request" data-request-id="{{ request.id }}"
+                                data-action="accept">Accept</button>
+                            <button class="respond-request" data-request-id="{{ request.id }}"
+                                data-action="reject">Reject</button>
                         </li>
                         {% endfor %}
                     </ul>
@@ -87,7 +95,9 @@
         function updateSearchResults(htmlContent) {
             $('#searchResults').html(htmlContent);
             rebindSendRequestButtons(); // Rebind event handlers right after updating the content
+            rebindCancelRequestButtons(); // Rebind cancel request buttons
         }
+
 
         function sendFriendRequest(userId, csrfToken) {
             $.ajax({
@@ -105,6 +115,7 @@
             });
         }
 
+
         function rebindSendRequestButtons() {
             $('.send-request').off('click').on('click', function () {
                 const userId = $(this).data('user-id');
@@ -112,6 +123,34 @@
                 sendFriendRequest(userId, csrfToken); // Extracted the AJAX call into a separate function
             });
         }
+
+        function cancelFriendRequest(userId, csrfToken) {
+            $.ajax({
+                url: `/cancel-friend-request/${userId}`,
+                type: 'POST',
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                },
+                success: function (response) {
+                    alert(response.message); // Display a success message
+                    // Optionally update the UI, e.g., remove the cancel button or disable it
+                    $(`button[data-user-id='${userId}']`).prop('disabled', true).text('Request Cancelled');
+                },
+                error: function () {
+                    alert('Error canceling friend request.'); // Display an error message
+                }
+            });
+        }
+
+        function rebindCancelRequestButtons() {
+            $('.cancel-request').off('click').on('click', function () {
+                const userId = $(this).data('user-id');
+                const csrfToken = $('input[name="csrf_token"]').val();
+                cancelFriendRequest(userId, csrfToken); // Call the function with user ID and CSRF token
+            });
+        }
+
+
 
         $('input[name="query"]').on('keyup', function () {
             var query = $(this).val();
@@ -140,6 +179,7 @@
 
         // Initial bind of the event handlers to ensure they are bound when the page loads
         rebindSendRequestButtons();
+        rebindCancelRequestButtons();
     });
 
 </script>
@@ -160,6 +200,7 @@
         function bindRespondRequestButtons() {
             // This function will be called inside fetchAndDisplayFriendRequests to rebind the events
             $('.respond-request').off('click').on('click', function () {
+                const button = $(this);
                 const requestId = $(this).data('request-id');
                 const action = $(this).data('action');
                 const csrfToken = $('input[name="csrf_token"]').val();
@@ -172,6 +213,7 @@
                     },
                     success: function (response) {
                         alert(response.message);
+                        button.closest('li').fadeOut('slow', function () { $(this).remove(); });
                         fetchAndDisplayFriendRequests();  // Refresh the list
                     },
                     error: function (xhr, status, error) {
@@ -183,6 +225,8 @@
         }
 
         fetchAndDisplayFriendRequests();  // Initial call to fetch and display friend requests
+
+
     });
 </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -223,7 +267,7 @@
 <script>
     const btnElList = document.querySelectorAll('.fNavBtn');
     btnElList.forEach(btnEl => {
-        btnEl.addEventListener('click', () =>{
+        btnEl.addEventListener('click', () => {
             document.querySelector('.special')?.classList.remove('special');
             btnEl.classList.add('special');
         })
@@ -232,7 +276,7 @@
 
 
 <script>
-    window.onload = function() {
+    window.onload = function () {
         document.getElementById("btn1").click();
     };
     function windowOpen1() {
@@ -260,5 +304,6 @@
         window2.style.display = "none";
     }
 </script>
+
 
 {% endblock %}

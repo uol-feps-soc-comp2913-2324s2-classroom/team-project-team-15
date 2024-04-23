@@ -381,21 +381,50 @@ def inject_subscription_details():
 @login_required
 def search_users():
     query = request.args.get('query', '')
-    
-    # Use SQLAlchemy to search for users with usernames or firstnames containing the query
     users = User.query.filter(
-        or_(User.username.ilike(f'%{query}%'),
-            User.firstname.ilike(f'%{query}%'))).all()
+        or_(User.username.ilike(f'%{query}%'), User.firstname.ilike(f'%{query}%'))
+    ).filter(User.id != current_user.id).all()
 
-    # Convert the results to a list of dictionaries for JSON part
-    users_json = [{'id': user.id, 'username': user.username, 'firstname': user.firstname}
-                  for user in users]
+    results = []
+    for user in users:
+        is_friend = user in current_user.friends
+        # Check if there is a pending friend request from the current user to this user
+        request_sent = FriendRequest.query.filter_by(
+            requester_id=current_user.id,
+            requestee_id=user.id,
+            status='pending'  # assuming 'status' can be 'pending', 'accepted', 'rejected'
+        ).first()
 
-    # Render the users into HTML using a separate template
-    html_content = render_template('searchResults.html', users=users)
+        results.append({
+            'username': user.username,
+            'id': user.id,
+            'request_sent': bool(request_sent),
+            'can_cancel': bool(request_sent),  # True if a request was sent and is pending
+            'is_friend': is_friend
+        })
 
-    # Return the results as JSON including both the HTML and the raw data
-    return jsonify({'html': html_content, 'users': users_json})
+    html_content = render_template('searchResults.html', users=results)
+    return jsonify(html=html_content, users=results)
+
+
+@app.route('/cancel-friend-request/<int:user_id>', methods=['POST'])
+@login_required
+def cancel_friend_request(user_id):
+    # Find the friend request to cancel
+    friend_request = FriendRequest.query.filter_by(
+        requester_id=current_user.id,
+        requestee_id=user_id,
+        status='pending'
+    ).first()
+
+    if friend_request:
+        # Delete the request if it exists and is still pending
+        db.session.delete(friend_request)
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Friend request cancelled.'})
+    else:
+        return jsonify({'status': 'error', 'message': 'No pending friend request found.'}), 404
+
 
 @app.route('/send-friend-request/<int:requestee_id>', methods=['POST'])
 @login_required
