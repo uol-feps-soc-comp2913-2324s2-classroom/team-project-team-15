@@ -14,7 +14,9 @@ body {
 }
 
 .friendsBody{
-    background-color: #ff6600a7; 
+    /* background-color: #ff6600a7;  */
+    background: #8787879b;
+    
 }
 .mainWhiteParent{
     position: relative;
@@ -38,6 +40,7 @@ body {
     border: none; 
     color: white;
     padding: 0;
+    font-weight: 700;
     cursor: pointer;
     margin: 5% 5% 0 5%;
     padding: 2%;
@@ -94,7 +97,7 @@ body {
 #searchResults li{
     width: 80%;
     position: relative;
-    background-color: #e65c00a7;
+    background-color: #ff6600;
     color:white;
     border-radius: 20px;
     padding: 10px;
@@ -134,7 +137,7 @@ body {
     height: 80vh;
     width: 500px;
     background-color: none;
-    border: 2px solid white;
+    border: 3px solid #ff6600;
     border-radius: 20px;
     margin: 2% 0 2% 0;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -184,7 +187,7 @@ nav#navbar {
     text-decoration: none;
     font-size: 1em;
     padding: 1vw 4.6vw;
-    margin: 0 1vw;
+    margin: auto;
     border-radius: 25px;
     transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.3s;
     border: 2.2px solid transparent;
@@ -215,6 +218,29 @@ nav#navbar {
     border: 3px solid white;
     transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.3s;
 }
+
+.thisNav{
+    width: 100vw;
+    display: flex;
+}
+.innerNav{
+    margin-right: auto;
+    margin-top: 1%;
+    /* margin-left: auto; */
+}
+.navName{
+    color: white;
+    padding: 30px;
+    font-weight: 700;
+
+}
+
+.navName:hover{
+    color: rgb(62, 62, 62);
+    text-decoration: none;
+    background-color: rgb(255, 255, 255);
+}
+
 
 .nav-button3 {
     display: inline-block;
@@ -960,9 +986,9 @@ nav#navbar {
     top: 0;
     right: 0;
     cursor: pointer;
-    border-radius: 0 0 0 20px;
-    border-bottom: 3px solid #ff6600;
-    border-left: 3px solid #ff6600;
+    /* border-radius: 0 0 0 20px; */
+    /* border-bottom: 3px solid #ff6600;
+    border-left: 3px solid #ff6600; */
 }
 
 
