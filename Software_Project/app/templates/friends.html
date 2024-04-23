@@ -19,7 +19,7 @@
                 <button class="special">My Friends</button>
                 <button class="fNavBtn">Requests</button>
             </div>
-            <div class="searchFriend">
+            <!-- <div class="searchFriend">
                 <div class="topSearch">
                     <form id="searchForm">
                         <input class="typeText" type="text" name="query" placeholder="Search for usernames...">
@@ -39,31 +39,35 @@
 
                     </ul>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Friends list section -->
-            <!-- <div id="friendsList">
-                <h2>My Friends</h2>
-                <ul>
-                    {% for friend in friends %}
-                    <li id="friend-{{ friend.id }}">
-                        {{ friend.firstname }} ({{ friend.username }})
-                        <button class="unfriend-button" data-friend-id="{{ friend.id }}">Unfriend</button>
-                    </li>
-                    {% endfor %}
-                </ul>
+            <div class="searchFriend">
+                <div id="searchResults" class="searchResults">
+                    <ul>
+                        {% for friend in friends %}
+                        <li id="friend-{{ friend.id }}">
+                            {{ friend.username }}
+                            <button class="unfriend-button" data-friend-id="{{ friend.id }}">Unfriend</button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
-            <div class="friend-requests">
-                <h2>Incoming Friend Requests</h2>
-                <ul>
-                    {% for request in requests %}
-                    <li>
-                        {{ request.requester.username }} wants to be friends.
-                        <button class="respond-request" data-request-id="{{ request.id }}" data-action="accept">Accept</button>
-                        <button class="respond-request" data-request-id="{{ request.id }}" data-action="reject">Reject</button>
-                    </li>
-                    {% endfor %}
-                </ul>
+
+            <!-- <div class="searchFriend">
+                <div id="searchResults" class="searchResults1">
+                    <ul>
+                        {% for request in requests %}
+                        <li>
+                            {{ request.requester.username }} wants to be friends.
+                            <button class="respond-request" data-request-id="{{ request.id }}" data-action="accept">Accept</button>
+                            <button class="respond-request" data-request-id="{{ request.id }}" data-action="reject">Reject</button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
             </div> -->
         </div>
     </div>
