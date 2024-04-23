@@ -8,7 +8,13 @@
             {% for user in users %}
             <li>
                 {{ user.username }}
+                {% if user.is_friend %}
+                <button disabled>Already Friends</button>
+                {% elif user.can_cancel %}
+                <button class="cancel-request" data-user-id="{{ user.id }}">Cancel Request</button>
+                {% else %}
                 <button class="send-request" data-user-id="{{ user.id }}">Request</button>
+                {% endif %}
             </li>
             {% endfor %}
         </ul>
