@@ -15,11 +15,11 @@
     <div class="mainWhiteParent">
         <div class="mainWhite">
             <div class="friendsNav">
-                <button class="fNavBtn">Search</button>
-                <button class="special">My Friends</button>
-                <button class="fNavBtn">Requests</button>
+                <button class="fNavBtn" id="btn1" onclick="windowOpen1()">Search</button>
+                <button class="fNavBtn"  onclick="windowOpen2()">My Friends</button>
+                <button class="fNavBtn"  onclick="windowOpen3()">Requests</button>
             </div>
-            <!-- <div class="searchFriend">
+            <div class="searchFriend" style="display: none;" id="window1">
                 <div class="topSearch">
                     <form id="searchForm">
                         <input class="typeText" type="text" name="query" placeholder="Search for usernames...">
@@ -39,10 +39,11 @@
 
                     </ul>
                 </div>
-            </div> -->
+            </div>
 
             <!-- Friends list section -->
-            <div class="searchFriend">
+            <div class="searchFriend" style="display: none;" id="window2">
+                <!-- <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> -->
                 <div id="searchResults" class="searchResults">
                     <ul>
                         {% for friend in friends %}
@@ -55,20 +56,21 @@
                 </div>
             </div>
 
-            <!-- <div class="searchFriend">
+            <div class="searchFriend" style="display: none;" id="window3">
+                <!-- <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> -->
                 <div id="searchResults" class="searchResults1">
                     <ul>
                         {% for request in requests %}
                         <li>
                             {{ request.requester.username }} wants to be friends.
                             <button class="respond-request" data-request-id="{{ request.id }}" data-action="accept">Accept</button>
-                            <button class="respond-request" data-request-id="{{ request.id }}" data-action="reject">Reject</button>
+                            <!-- <button class="respond-request" data-request-id="{{ request.id }}" data-action="reject">Reject</button> -->
                         </li>
                         {% endfor %}
                     </ul>
                 </div>
+            </div>
 
-            </div> -->
         </div>
     </div>
 
@@ -79,13 +81,7 @@
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // const btnElList = document.querySelectorAll('.fNavBtn');
-    // btnElList.forEach(btnEl => {
-    //     btnEl.addEventListener('click', () =>{
-    //         document.querySelector('.special')?.classList.remove('special');
-    //         btnEl.classList.add('special');
-    //     })
-    // })
+
 
     $(document).ready(function () {
         function updateSearchResults(htmlContent) {
@@ -223,6 +219,46 @@
             });
         });
     });
+</script>
+<script>
+    const btnElList = document.querySelectorAll('.fNavBtn');
+    btnElList.forEach(btnEl => {
+        btnEl.addEventListener('click', () =>{
+            document.querySelector('.special')?.classList.remove('special');
+            btnEl.classList.add('special');
+        })
+    })
+</script>
+
+
+<script>
+    window.onload = function() {
+        document.getElementById("btn1").click();
+    };
+    function windowOpen1() {
+        const window1 = document.getElementById("window1");
+        const window2 = document.getElementById("window2");
+        const window3 = document.getElementById("window3");
+        window1.style.display = "block";
+        window2.style.display = "none";
+        window3.style.display = "none";
+    }
+    function windowOpen2() {
+        const window1 = document.getElementById("window1");
+        const window2 = document.getElementById("window2");
+        const window3 = document.getElementById("window3");
+        window2.style.display = "block";
+        window1.style.display = "none";
+        window3.style.display = "none";
+    }
+    function windowOpen3() {
+        const window1 = document.getElementById("window1");
+        const window2 = document.getElementById("window2");
+        const window3 = document.getElementById("window3");
+        window3.style.display = "block";
+        window1.style.display = "none";
+        window2.style.display = "none";
+    }
 </script>
 
 {% endblock %}
