@@ -13,6 +13,7 @@ from collections import defaultdict
 import stripe
 import logging
 from datetime import date, datetime, timedelta
+from functools import wraps
 stripe.api_key = 'sk_test_51OubkTGiwWWmEjuUTmrjuRowLjdmFXb365kmtoD0YRLYf7rYKIVhFBIEwn3ozE4O1TMSIqcHa9WIk07RcbIqfErC00DyV65frs'
 
 def create_stripe_customer(user):
@@ -26,6 +27,18 @@ def create_stripe_customer(user):
     except Exception as e:
         print(f"Failed to create Stripe customer: {e}")
         return None  # Return None if customer creation fails
+    
+def membership_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user = current_user
+        today = datetime.today().date()
+        if not user.subscription_plan or user.subscription_plan.expiration_date < today:
+            flash('Your membership is expired or does not exist. Please renew your membership.', 'warning')
+            return redirect(url_for('choose_subscription'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 @app.route('/', methods=['GET'])
 def index():
@@ -188,6 +201,7 @@ def choose_subscription():
 
 @app.route('/enable_auto_renewal', methods=['POST'])
 @login_required
+@membership_required
 def enable_auto_renewal():
     user = User.query.get(current_user.id)
     if not user or not user.stripe_customer_id:
@@ -379,6 +393,7 @@ def inject_subscription_details():
 
 @app.route('/search-users', methods=['GET'])
 @login_required
+@membership_required
 def search_users():
     query = request.args.get('query', '')
     users = User.query.filter(
@@ -409,6 +424,7 @@ def search_users():
 
 @app.route('/cancel-friend-request/<int:user_id>', methods=['POST'])
 @login_required
+@membership_required
 def cancel_friend_request(user_id):
     # Find the friend request to cancel
     friend_request = FriendRequest.query.filter_by(
@@ -428,6 +444,7 @@ def cancel_friend_request(user_id):
 
 @app.route('/send-friend-request/<int:requestee_id>', methods=['POST'])
 @login_required
+@membership_required
 def send_friend_request(requestee_id):
     # Prevent self-friend requests
     if current_user.id == requestee_id:
@@ -472,6 +489,7 @@ def send_friend_request(requestee_id):
 
 @app.route('/fetch-friend-requests', methods=['GET'])
 @login_required
+@membership_required
 def fetch_friend_requests():
     incoming_requests = FriendRequest.query.filter_by(requestee_id=current_user.id, status='pending').all()
     requests_data = [{'id': req.id, 'username': req.requester.username} for req in incoming_requests]
@@ -479,6 +497,7 @@ def fetch_friend_requests():
 
 @app.route('/respond-friend-request/<request_id>/<action>', methods=['POST'])
 @login_required
+@membership_required
 def respond_friend_request(request_id, action):
     friend_request = FriendRequest.query.get_or_404(request_id)
     if friend_request.requestee_id != current_user.id:
@@ -520,6 +539,7 @@ def unfriend(user_id, friend_id):
 
 @app.route('/unfriend/<int:friend_id>', methods=['POST'])
 @login_required
+@membership_required
 def handle_unfriend(friend_id):
     result = unfriend(current_user.id, friend_id)
     
@@ -531,6 +551,7 @@ def handle_unfriend(friend_id):
 
 @app.route('/friends')
 @login_required
+@membership_required
 def friends():
     # Assuming FriendRequest has a 'status' column with values like 'pending', 'accepted', etc.
     incoming_requests = FriendRequest.query.filter_by(requestee_id=current_user.id, status='pending').all()
@@ -541,6 +562,8 @@ def friends():
 
 
 @app.route('/add-journey', methods=['POST'])
+@login_required
+@membership_required
 def add_journey():
     data = request.json
     if not data:
@@ -556,6 +579,7 @@ def add_journey():
 
 @app.route('/gps', methods=['GET'])
 @login_required
+@membership_required
 def gps_page():
     # Fetch all journeys for the current user to display
     journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
@@ -566,6 +590,7 @@ def gps_page():
 
 @app.route('/userroute', methods=['GET'])
 @login_required
+@membership_required
 def user_route():
     # Fetch all journeys for the current user to display
     journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
