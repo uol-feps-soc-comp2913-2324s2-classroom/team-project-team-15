@@ -171,7 +171,7 @@ def get_stripe_plans():
         print(f"Error fetching Stripe plans: {e}")
         return []
 
-@app.route('/choose_subscription', methods=['GET'])
+@app.route('/choose_subscription', methods=['GET','POST'])
 @login_required
 def choose_subscription():
     plans = get_stripe_plans()
@@ -197,8 +197,6 @@ def choose_subscription():
         subscription_details = {
             'is_auto_renewal_on': not subscription.cancel_at_period_end,
         }         
-
-        
 
     return render_template('choose_subscription.html', plans=plans, current_subscription=current_subscription,subscription_details=subscription_details)
 
@@ -338,8 +336,56 @@ def payment_cancel():
     flash('Payment was canceled.', 'warning')
     return redirect(url_for('index'))
 
+@app.route('/change_subscription/<string:new_plan_stripe_id>', methods=['POST'])
+@login_required
+def change_subscription(new_plan_stripe_id):
+    # Fetch current user based on session or token
+    user = User.query.get(current_user.id)
+    if not user:
+        flash('No user found.', 'error')
+        return redirect(url_for('choose_subscription'))
+
+    # Fetch plans from Stripe
+    plans = get_stripe_plans()
+    stripe_plan = next((plan for plan in plans if plan['id'] == new_plan_stripe_id), None)
+    if not stripe_plan:
+        flash('Plan not found.', 'error')
+        return redirect(url_for('choose_subscription'))
+
+    # If the plan is valid, find or create a SubscriptionPlan in local DB
+    subscription_plan = SubscriptionPlan.query.filter_by(stripe_price_id=new_plan_stripe_id).first()
+    if not subscription_plan:
+        # If no local plan exists, create a new one
+        subscription_plan = SubscriptionPlan(
+            stripe_price_id=new_plan_stripe_id,
+            plan_name=stripe_plan['name'],
+            price=stripe_plan['amount'],
+            duration=stripe_plan['interval'],
+            # Assuming other necessary fields are filled accordingly
+        )
+        db.session.add(subscription_plan)
+        db.session.flush()  # Flush to assign an ID if needed
+
+    # Assign the new plan to the user
+    if user.subscription_plan and user.subscription_plan.expiration_date and user.subscription_plan.expiration_date > date.today():
+        # Plan changes at the end of the current period
+        user.subscription_plan.next_plan_id = subscription_plan.id
+        flash('Your subscription will be updated at the end of your current period.', 'success')
+    else:
+        # Update immediately if no active or expired plan
+        user.subscription_plan = subscription_plan
+        user.subscription_start_date = date.today()  # Reset the start date
+        flash('Your subscription has been updated.', 'success')
+    
+    db.session.commit()
+    return redirect(url_for('choose_subscription'))
+
+
+
+
 @app.route('/cancel_subscription', methods=['POST'])
 @login_required
+@membership_required
 def cancel_subscription():
     user = User.query.get(current_user.id)
     if not user or not user.stripe_customer_id:

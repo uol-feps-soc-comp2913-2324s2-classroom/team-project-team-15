@@ -24,16 +24,19 @@ scheduler = BackgroundScheduler(daemon=True)
 def check_expired_subscriptions():
     with app.app_context():  # Ensure database context is available
         today = datetime.today().date()
-        from app.models import User  # Import here to avoid circular import
+        from app.models import User,SubscriptionPlan  # Import here to avoid circular import
         users = User.query.all()
         for user in users:
             if user.subscription_plan and user.subscription_plan.expiration_date < today:
-                user.subscription_plan_id = None
-                db.session.delete(user.subscription_plan)
-                db.session.commit()
+                if user.subscription_plan.next_plan_id:
+                    user.subscription_plan_id = user.subscription_plan.next_plan_id
+                    user.subscription_plan.next_plan_id = None
+                else:
+                    user.subscription_plan_id = None
+                    db.session.delete(user.subscription_plan)
+            db.session.commit()
 
-scheduler.add_job(func=check_expired_subscriptions, trigger='interval', hours=24,
-    next_run_time=datetime.now())
+scheduler.add_job(func=check_expired_subscriptions, trigger='interval', hours=24)
 scheduler.start()
 
 

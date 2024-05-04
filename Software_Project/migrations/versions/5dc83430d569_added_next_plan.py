@@ -1,8 +1,8 @@
-"""initial migration
+"""Added Next plan
 
-Revision ID: 71ce630e5dc1
+Revision ID: 5dc83430d569
 Revises: 
-Create Date: 2024-03-29 16:21:42.705297
+Create Date: 2024-05-04 05:20:46.860558
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '71ce630e5dc1'
+revision = '5dc83430d569'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,8 +31,10 @@ def upgrade():
     sa.Column('price', sa.Float(), nullable=False),
     sa.Column('duration', sa.String(length=20), nullable=False),
     sa.Column('expiration_date', sa.Date(), nullable=True),
+    sa.Column('next_plan_id', sa.Integer(), nullable=True),
     sa.Column('stripe_price_id', sa.String(length=255), nullable=True),
     sa.Column('stripe_customer_id', sa.String(length=255), nullable=True),
+    sa.ForeignKeyConstraint(['next_plan_id'], ['subscription_plan.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('stripe_customer_id')
     )
@@ -56,14 +58,14 @@ def upgrade():
     sa.UniqueConstraint('username')
     )
     op.create_table('friend_requests',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.String(length=36), nullable=False),
     sa.Column('requester_id', sa.Integer(), nullable=False),
     sa.Column('requestee_id', sa.Integer(), nullable=False),
     sa.Column('status', sa.String(length=10), nullable=False),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['requestee_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['requester_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id', 'requester_id', 'requestee_id')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('friends',
     sa.Column('user_id', sa.Integer(), nullable=False),

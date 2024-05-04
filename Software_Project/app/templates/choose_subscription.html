@@ -40,12 +40,16 @@
         {% if current_subscription and plan.id == current_subscription.price_id %}
         <button disabled>Current Plan</button>
         {% else %}
+        {% if current_subscription %}
+        <form action="{{ url_for('change_subscription', new_plan_stripe_id=plan.id) }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">Change to {{ plan.plan_name }}</button>
+        </form>
+        {% else %}
         <form action="{{ url_for('create_checkout_session', plan_id=plan.id) }}" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="stripe_price_id" value="{{ plan.id }}">
-            {% if current_subscription %}
-            <button type="submit">Change to {{ plan.plan_name }}</button>
-            {% else %}
+
             <button type="submit">Choose {{ plan.plan_name }}</button>
             {% endif %}
         </form>
