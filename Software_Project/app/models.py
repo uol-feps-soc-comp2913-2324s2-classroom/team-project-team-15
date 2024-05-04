@@ -82,6 +82,17 @@ class Payment(db.Model):
     stripe_session_id= db.Column(db.String(255),nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     user= db.relationship('User',backref=db.backref('payments',lazy=True))
+    payment_method_type = db.Column(db.String(50), nullable=True)  # e.g., 'card'
+    card_expiry_date = db.Column(db.String(10), nullable=True)
+
+    def update_status(self, new_status):
+        self.payment_status = new_status
+        db.session.commit()
+
+    def set_card_details(self, card_type, expiry_date):
+        self.payment_method_type = card_type
+        self.card_expiry_date = expiry_date
+        db.session.commit()
 
 class RevenueEstimate(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -1,6 +1,7 @@
 import json
 from operator import or_
 import re
+from venv import logger
 from flask import render_template, redirect, url_for, flash, request,session,jsonify, current_app
 from app import app, db
 from app.models import SubscriptionPlan, User,Payment, FriendRequest, JourneyRecord
@@ -200,46 +201,10 @@ def choose_subscription():
 
     return render_template('choose_subscription.html', plans=plans, current_subscription=current_subscription,subscription_details=subscription_details)
 
-@app.route('/enable_auto_renewal', methods=['POST'])
-@login_required
-@membership_required
-def enable_auto_renewal():
-    user = User.query.get(current_user.id)
-    if not user or not user.stripe_customer_id:
-        flash('You do not have an active subscription.', 'error')
-        return redirect(url_for('index'))
 
-    try:
-
-        subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id)
-        subscription_id = None
-        for subscription in subscriptions.auto_paging_iter():
-            # Assuming you store the Stripe Price ID in subscription_plan.stripe_price_id
-            if subscription['items']['data'][0]['price']['id'] == user.subscription_plan.stripe_price_id:
-                subscription_id = subscription['id']
-                break
-        
-        if not subscription_id:
-            flash('No active subscription found for cancellation.', 'error')
-            return redirect(url_for('index'))
-        
-        # Cancel the subscription at period's end
-        stripe.Subscription.modify(
-            subscription_id,
-            cancel_at_period_end=False
-        )
-
-        # Update your models as necessary
-        db.session.commit()
-
-        flash('Your subscription will be automatically renewed at the end of the current billing period.', 'success')
-    except Exception as e:
-        flash(f'An error occurred while Enabling Auto-Renewal your subscription: {e}', 'error')
-
-    return redirect(url_for('index'))
         
 
-@app.route('/create_checkout_session', methods=['POST'])
+@app.route('/create_checkout_session', methods=['GET','POST'])
 @login_required
 def create_checkout_session():
     user = current_user
@@ -267,7 +232,7 @@ def create_checkout_session():
         return redirect(url_for('choose_subscription'))
 
 
-@app.route('/payment_success', methods=['GET'])
+@app.route('/payment_success', methods=['GET'], endpoint='payment_success')
 @login_required
 def payment_success():
     session_id = request.args.get('session_id')
@@ -305,13 +270,22 @@ def payment_success():
         if user:
             user.subscription_start_date = start_date
             # Update user's subscription_end_date if applicable
+        payment_methods=stripe.PaymentMethod.list(
+            customer=user.stripe_customer_id,
+            type="card"
+        )
+        if payment_methods and payment_methods.data:
+            card_details=payment_methods.data[0].card
+            expiry_date=f"{card_details.exp_month}/{card_details.exp_year}"
 
         payment = Payment(
             user_id=user.id,
             amount=price.unit_amount / 100,
             payment_date=datetime.utcnow(),
             payment_status=subscription.status,
-            stripe_session_id=session_id
+            stripe_session_id=session_id,
+            payment_method_type='card',
+            card_expiry_date=expiry_date
         )
         db.session.add(payment)
         db.session.commit()
@@ -329,11 +303,62 @@ def payment_success():
     return redirect(url_for('index'))
 
 
-@app.route('/payment_cancel',methods=['GET'])
+@app.route('/payment_cancel',methods=['GET'], endpoint='handle_cancel')
 @login_required
 def payment_cancel():
     # Inform the user that their payment was canceled
     flash('Payment was canceled.', 'warning')
+    return redirect(url_for('index'))
+
+
+def is_payment_card_expired(user):
+    if user.payments:
+        latest_payment = max(user.payments, key=lambda x: x.payment_date, default=None)
+        if latest_payment and latest_payment.card_expiry_date:
+            expiry_date = datetime.strptime(latest_payment.card_expiry_date, "%m/%Y")
+            if expiry_date <= datetime.utcnow():
+                return True
+    return False
+
+
+@app.route('/enable_auto_renewal', methods=['POST'])
+@login_required
+@membership_required
+def enable_auto_renewal():
+    user = User.query.get(current_user.id)
+    if not user or not user.stripe_customer_id:
+        flash('You do not have an active subscription.', 'error')
+        return redirect(url_for('index'))
+
+
+
+    try:
+
+        subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id)
+        subscription_id = None
+        for subscription in subscriptions.auto_paging_iter():
+            # Assuming you store the Stripe Price ID in subscription_plan.stripe_price_id
+            if subscription['items']['data'][0]['price']['id'] == user.subscription_plan.stripe_price_id:
+                subscription_id = subscription['id']
+                break
+        
+        if not subscription_id:
+            flash('No active subscription found for cancellation.', 'error')
+            return redirect(url_for('index'))
+        
+        # Cancel the subscription at period's end
+        stripe.Subscription.modify(
+            subscription_id,
+            cancel_at_period_end=False
+        )
+
+        # Update your models as necessary
+        db.session.commit()
+
+        flash('Your subscription will be automatically renewed at the end of the current billing period.', 'success')
+    except Exception as e:
+        flash(f'An error occurred while Enabling Auto-Renewal your subscription: {e}', 'error')
+
     return redirect(url_for('index'))
 
 @app.route('/change_subscription/<string:new_plan_stripe_id>', methods=['POST'])
@@ -344,6 +369,9 @@ def change_subscription(new_plan_stripe_id):
     if not user:
         flash('No user found.', 'error')
         return redirect(url_for('choose_subscription'))
+    if is_payment_card_expired(user):
+        flash('Your payment card has expired. Please update your payment method.', 'error')
+        return redirect(url_for('update_card_details')) 
 
     # Fetch plans from Stripe
     plans = get_stripe_plans()
@@ -370,6 +398,7 @@ def change_subscription(new_plan_stripe_id):
     if user.subscription_plan and user.subscription_plan.expiration_date and user.subscription_plan.expiration_date > date.today():
         # Plan changes at the end of the current period
         user.subscription_plan.next_plan_id = subscription_plan.id
+        user.subscription_plan.cancel_at_period_end = True
         flash('Your subscription will be updated at the end of your current period.', 'success')
     else:
         # Update immediately if no active or expired plan
@@ -380,7 +409,76 @@ def change_subscription(new_plan_stripe_id):
     db.session.commit()
     return redirect(url_for('choose_subscription'))
 
+@app.route('/update_card_details', methods=['GET'])
+@login_required
+def update_card_details():
+    user = User.query.get(current_user.id)
+    try:
+        # Create a Stripe Checkout session for updating card details
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            customer=user.stripe_customer_id,
+            mode='setup',  # This mode is used for setting up or updating payment details
+            success_url=url_for('payment_method_success', _external=True)+ '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=url_for('handle_cancel', _external=True),
+        )
+        return redirect(session.url, code=303)
+    except Exception as e:
+        flash(f"Failed to initiate payment method update: {e}", 'error')
+        return redirect(url_for('choose_subscription'))
 
+@app.route('/payment_method_success')
+@login_required
+def payment_method_success():
+    session_id = request.args.get('session_id')
+    if not session_id:
+        flash('No payment session found.', 'error')
+        return redirect(url_for('choose_subscription'))
+
+    try:
+        # Retrieve the session and payment method from Stripe
+        session = stripe.checkout.Session.retrieve(session_id)
+        customer_id = session.customer
+        new_payment_method_id = session.payment_method
+
+        # Retrieve and detach old payment methods
+        old_payment_methods = stripe.PaymentMethod.list(customer_id=customer_id, type="card")
+        for pm in old_payment_methods.data:
+            if pm.id != new_payment_method_id:
+                stripe.PaymentMethod.detach(pm.id)
+
+        # Retrieve and add the new payment method
+        new_payment_method = stripe.PaymentMethod.retrieve(new_payment_method_id)
+
+        # Assuming the payment method type is card and has card details
+        card_details = new_payment_method.card
+        expiry_date = f"{card_details.exp_month}/{card_details.exp_year}"
+
+        # Remove local references to old payment methods and update with new
+        Payment.query.filter_by(user_id=current_user.id).delete()  # Adjust based on your schema
+        db.session.commit()
+
+        # Create a new payment record or update the existing record strategy
+        new_payment_record = Payment(
+            user_id=current_user.id,
+            card_expiry_date=expiry_date,
+            payment_method_id=new_payment_method_id
+        )
+        db.session.add(new_payment_record)
+        db.session.commit()
+        
+        flash('Payment method updated successfully!', 'success')
+
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe error: {e.user_message}")
+        flash(f"Stripe error: {e.user_message}", 'error')
+        return redirect(url_for('choose_subscription'))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
+        flash('An unexpected error occurred.', 'error')
+        return redirect(url_for('choose_subscription'))
+
+    return redirect(url_for('index'))
 
 
 @app.route('/cancel_subscription', methods=['POST'])
