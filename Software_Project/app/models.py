@@ -1,3 +1,4 @@
+from sqlalchemy import ForeignKeyConstraint, UniqueConstraint
 from app import db
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -67,9 +68,11 @@ class SubscriptionPlan(db.Model):
     price = db.Column(db.Float, nullable=False)
     duration = db.Column(db.String(20), nullable=False)
     expiration_date = db.Column(db.Date, nullable=True)
+    next_plan_id = db.Column(db.Integer, db.ForeignKey('subscription_plan.id', name='fk_next_plan_id'), nullable=True)
     users = db.relationship('User', backref='subscription_plan', lazy=True)
     stripe_price_id = db.Column(db.String(255))
     stripe_customer_id = db.Column(db.String(255), nullable=True, unique=True)
+    __table_args__ = (ForeignKeyConstraint(['next_plan_id'], ['subscription_plan.id'], name='fk_next_plan_id'),)
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
