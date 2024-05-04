@@ -16,6 +16,9 @@ from datetime import date, datetime, timedelta
 from functools import wraps
 stripe.api_key = 'sk_test_51OubkTGiwWWmEjuUTmrjuRowLjdmFXb365kmtoD0YRLYf7rYKIVhFBIEwn3ozE4O1TMSIqcHa9WIk07RcbIqfErC00DyV65frs'
 
+
+
+
 def create_stripe_customer(user):
     try:
         customer = stripe.Customer.create(
