@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<form action="{{ url_for('upload_gps') }}" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="file" name="gpsdata" required>
+    <select name="type">
+        <option value="running">Running</option>
+        <option value="cycling">Cycling</option>
+    </select>
+    <button type="submit">Upload GPS Data</button>
+</form>
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+{% endblock %}

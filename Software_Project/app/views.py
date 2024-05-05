@@ -3,6 +3,7 @@ from operator import or_
 import re
 from venv import logger
 from flask import render_template, redirect, url_for, flash, request,session,jsonify, current_app
+import gpxpy
 from app import app, db
 from app.models import SubscriptionPlan, User,Payment, FriendRequest, JourneyRecord
 from app.forms import RegistrationForm
@@ -438,47 +439,42 @@ def payment_method_success():
     try:
         # Retrieve the session and payment method from Stripe
         session = stripe.checkout.Session.retrieve(session_id)
-        customer_id = session.customer
-        new_payment_method_id = session.payment_method
+        new_payment_method = stripe.PaymentMethod.retrieve(session.payment_method)
 
-        # Retrieve and detach old payment methods
-        old_payment_methods = stripe.PaymentMethod.list(customer_id=customer_id, type="card")
+        if not new_payment_method or new_payment_method.customer != session.customer:
+            flash('Mismatch in payment method details.', 'error')
+            return redirect(url_for('choose_subscription'))
+
+        # Detach all old payment methods except the new one
+        old_payment_methods = stripe.PaymentMethod.list(customer=session.customer, type="card")
         for pm in old_payment_methods.data:
-            if pm.id != new_payment_method_id:
+            if pm.id != new_payment_method.id:
                 stripe.PaymentMethod.detach(pm.id)
 
-        # Retrieve and add the new payment method
-        new_payment_method = stripe.PaymentMethod.retrieve(new_payment_method_id)
+        # Update local database with new card expiry date
+        update_local_payment_method(current_user.id, new_payment_method.card.exp_month, new_payment_method.card.exp_year)
 
-        # Assuming the payment method type is card and has card details
-        card_details = new_payment_method.card
-        expiry_date = f"{card_details.exp_month}/{card_details.exp_year}"
-
-        # Remove local references to old payment methods and update with new
-        Payment.query.filter_by(user_id=current_user.id).delete()  # Adjust based on your schema
-        db.session.commit()
-
-        # Create a new payment record or update the existing record strategy
-        new_payment_record = Payment(
-            user_id=current_user.id,
-            card_expiry_date=expiry_date,
-            payment_method_id=new_payment_method_id
-        )
-        db.session.add(new_payment_record)
-        db.session.commit()
-        
         flash('Payment method updated successfully!', 'success')
-
     except stripe.error.StripeError as e:
-        logger.error(f"Stripe error: {e.user_message}")
-        flash(f"Stripe error: {e.user_message}", 'error')
+        logger.error(f"Stripe API error: {e.user_message}")
+        flash(f"Stripe API error: {e.user_message}", 'error')
         return redirect(url_for('choose_subscription'))
     except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
+        logger.error(f"Unhandled exception: {e}")
         flash('An unexpected error occurred.', 'error')
         return redirect(url_for('choose_subscription'))
 
-    return redirect(url_for('index'))
+    return redirect(url_for('user_profile'))
+
+def update_local_payment_method(user_id, exp_month, exp_year):
+    # Find the latest or appropriate payment record to update
+    payment = Payment.query.filter_by(user_id=user_id).order_by(Payment.payment_date.desc()).first()
+    if payment:
+        payment.card_expiry_date = f"{exp_month}/{exp_year}"
+        db.session.commit()
+    else:
+        # Log or handle the scenario where no payment record is found
+        logger.error(f"No payment record found for user ID {user_id}")
 
 
 @app.route('/cancel_subscription', methods=['POST'])
@@ -750,3 +746,40 @@ def user_route():
         'time_taken': journey.time_taken
     } for journey in journeys]
     return render_template('userroute.html', journeys=serialized_journeys)
+
+
+@app.route('/upload_gps', methods=['GET', 'POST'])
+@login_required
+def upload_gps():
+    if request.method == 'POST':
+        file = request.files.get('gpsdata')
+        type = request.form.get('type')
+        if file and type:
+            gpx = gpxpy.parse(file.stream)
+            coordinates = [{'lat': point.latitude, 'lon': point.longitude} for track in gpx.tracks for segment in track.segments for point in segment.points]
+            start_time = min((point.time for track in gpx.tracks for segment in track.segments for point in segment.points), default=datetime.utcnow())
+            end_time = max((point.time for track in gpx.tracks for segment in track.segments for point in segment.points), default=datetime.utcnow())
+            
+            journey = JourneyRecord(user_id=current_user.id, type=type, start_time=start_time, end_time=end_time, data={'coordinates': coordinates})
+            db.session.add(journey)
+            db.session.commit()
+            return redirect(url_for('index'))
+        return render_template('upload_gps.html', error="Invalid file or type")
+    else:
+        return render_template('upload_gps.html')
+
+@app.route('/journeys')
+@login_required
+def display_journeys():
+    journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
+    return render_template('display_journey.html', journeys=journeys)
+
+@app.route('/api/journeys')
+@login_required
+def api_journeys():
+    journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
+    journeys_data = [{
+        'id': journey.id,
+        'data': journey.data  # This should be a dict that includes 'coordinates' list
+    } for journey in journeys]
+    return jsonify(journeys_data)
