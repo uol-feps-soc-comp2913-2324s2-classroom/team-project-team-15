@@ -100,7 +100,7 @@ def login():
             # Check if it's the user's first login or if they haven't selected a subscription plan
             if not user.subscription_plan_id:
                 return redirect(url_for('choose_subscription'))
-            return redirect(url_for('index'))
+            return redirect(url_for('display_journeys'))
         else:
             flash('Invalid username or password')
     return render_template('login.html')
@@ -709,6 +709,7 @@ def friends():
 
 @app.route('/upload_gps', methods=['GET', 'POST'])
 @login_required
+@membership_required
 def upload_gps():
     if request.method == 'POST':
         file = request.files.get('gpsdata')
@@ -751,7 +752,7 @@ def upload_gps():
             db.session.add(journey)
             db.session.commit()
             flash('GPS Data successfully uploaded.', 'success')
-            return redirect(url_for('index'))
+            return redirect(url_for('display_journeys'))
         except Exception as e:
             flash(f'Error processing file: {str(e)}', 'error')
             return render_template('upload_gps.html')
@@ -780,6 +781,30 @@ def api_journeys():
         'data': journey.data  # This should be a dict that includes 'coordinates' list
     } for journey in journeys]
     return jsonify(journeys_data)
+
+@app.route('/api/journeys_stats')
+@login_required
+def api_journeys_stats():
+    user_id = current_user.id
+    journeys = JourneyRecord.query.filter_by(user_id=user_id).all()
+
+    total_calories = sum(journey.calculate_calories_burned() for journey in journeys)
+    total_distance = sum(journey.calculate_distance() for journey in journeys)
+    
+    # Calculate distance by type
+    distance_by_type = {}
+    for journey in journeys:
+        if journey.type in distance_by_type:
+            distance_by_type[journey.type] += journey.calculate_distance()
+        else:
+            distance_by_type[journey.type] = journey.calculate_distance()
+
+    return jsonify({
+        'total_calories': total_calories,
+        'total_distance': total_distance,
+        'distance_by_type': distance_by_type
+    })
+
 
 @app.route('/list_journeys')
 @login_required
@@ -857,3 +882,32 @@ def download_as_csv(journey):
     output.headers["Content-Disposition"] = f"attachment; filename=journey_{journey.id}.csv"
     output.headers["Content-type"] = "text/csv"
     return output
+
+
+@app.route('/api/friends/latest-journeys', methods=['GET'])
+@login_required
+@membership_required
+def get_latest_journeys():
+    friends = current_user.friends 
+    latest_journeys = []
+    for friend in friends:
+        latest_journey = JourneyRecord.query.filter_by(user_id=friend.id).order_by(JourneyRecord.end_time.desc()).first()
+        if latest_journey:
+             latest_journeys.append({
+                'user_id': friend.id,
+                'username': friend.username,
+                'journey_id': latest_journey.id,
+                'name': latest_journey.name,
+                'type': latest_journey.type,
+                'duration': latest_journey.calculate_duration(),
+                'distance': latest_journey.calculate_distance(),
+                'calories': latest_journey.calculate_calories_burned(),
+                'speed': latest_journey.calculate_average_speed(),
+                'coordinates': latest_journey.data.get('coordinates', [])
+            })
+
+    return jsonify(latest_journeys)
+
+@app.route('/view-friends-journeys')
+def view_friends_journeys():
+    return render_template('shared_map.html')
