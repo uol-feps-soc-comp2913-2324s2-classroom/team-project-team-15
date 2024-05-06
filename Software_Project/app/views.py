@@ -306,7 +306,7 @@ def payment_success():
     return redirect(url_for('index'))
 
 
-@app.route('/payment_cancel',methods=['GET'], endpoint='handle_cancel')
+@app.route('/payment_cancel',methods=['GET'])
 @login_required
 def payment_cancel():
     # Inform the user that their payment was canceled
