@@ -1,7 +1,10 @@
+import io
 import json
 from operator import or_
 import re
-from flask import render_template, redirect, url_for, flash, request,session,jsonify, current_app
+from venv import logger
+from flask import make_response, render_template, redirect, url_for, flash, request,session,jsonify, current_app, Response
+import gpxpy
 from app import app, db
 from app.models import SubscriptionPlan, User,Payment, FriendRequest, JourneyRecord
 from app.forms import RegistrationForm
@@ -14,6 +17,7 @@ import stripe
 import logging
 from datetime import date, datetime, timedelta
 from functools import wraps
+import csv
 stripe.api_key = 'sk_test_51OubkTGiwWWmEjuUTmrjuRowLjdmFXb365kmtoD0YRLYf7rYKIVhFBIEwn3ozE4O1TMSIqcHa9WIk07RcbIqfErC00DyV65frs'
 
 
@@ -200,46 +204,10 @@ def choose_subscription():
 
     return render_template('choose_subscription.html', plans=plans, current_subscription=current_subscription,subscription_details=subscription_details)
 
-@app.route('/enable_auto_renewal', methods=['POST'])
-@login_required
-@membership_required
-def enable_auto_renewal():
-    user = User.query.get(current_user.id)
-    if not user or not user.stripe_customer_id:
-        flash('You do not have an active subscription.', 'error')
-        return redirect(url_for('index'))
 
-    try:
-
-        subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id)
-        subscription_id = None
-        for subscription in subscriptions.auto_paging_iter():
-            # Assuming you store the Stripe Price ID in subscription_plan.stripe_price_id
-            if subscription['items']['data'][0]['price']['id'] == user.subscription_plan.stripe_price_id:
-                subscription_id = subscription['id']
-                break
-        
-        if not subscription_id:
-            flash('No active subscription found for cancellation.', 'error')
-            return redirect(url_for('index'))
-        
-        # Cancel the subscription at period's end
-        stripe.Subscription.modify(
-            subscription_id,
-            cancel_at_period_end=False
-        )
-
-        # Update your models as necessary
-        db.session.commit()
-
-        flash('Your subscription will be automatically renewed at the end of the current billing period.', 'success')
-    except Exception as e:
-        flash(f'An error occurred while Enabling Auto-Renewal your subscription: {e}', 'error')
-
-    return redirect(url_for('index'))
         
 
-@app.route('/create_checkout_session', methods=['POST'])
+@app.route('/create_checkout_session', methods=['GET','POST'])
 @login_required
 def create_checkout_session():
     user = current_user
@@ -267,7 +235,7 @@ def create_checkout_session():
         return redirect(url_for('choose_subscription'))
 
 
-@app.route('/payment_success', methods=['GET'])
+@app.route('/payment_success', methods=['GET'], endpoint='payment_success')
 @login_required
 def payment_success():
     session_id = request.args.get('session_id')
@@ -305,13 +273,22 @@ def payment_success():
         if user:
             user.subscription_start_date = start_date
             # Update user's subscription_end_date if applicable
+        payment_methods=stripe.PaymentMethod.list(
+            customer=user.stripe_customer_id,
+            type="card"
+        )
+        if payment_methods and payment_methods.data:
+            card_details=payment_methods.data[0].card
+            expiry_date=f"{card_details.exp_month}/{card_details.exp_year}"
 
         payment = Payment(
             user_id=user.id,
             amount=price.unit_amount / 100,
             payment_date=datetime.utcnow(),
             payment_status=subscription.status,
-            stripe_session_id=session_id
+            stripe_session_id=session_id,
+            payment_method_type='card',
+            card_expiry_date=expiry_date
         )
         db.session.add(payment)
         db.session.commit()
@@ -329,11 +306,62 @@ def payment_success():
     return redirect(url_for('index'))
 
 
-@app.route('/payment_cancel',methods=['GET'])
+@app.route('/payment_cancel',methods=['GET'], endpoint='handle_cancel')
 @login_required
 def payment_cancel():
     # Inform the user that their payment was canceled
     flash('Payment was canceled.', 'warning')
+    return redirect(url_for('index'))
+
+
+def is_payment_card_expired(user):
+    if user.payments:
+        latest_payment = max(user.payments, key=lambda x: x.payment_date, default=None)
+        if latest_payment and latest_payment.card_expiry_date:
+            expiry_date = datetime.strptime(latest_payment.card_expiry_date, "%m/%Y")
+            if expiry_date <= datetime.utcnow():
+                return True
+    return False
+
+
+@app.route('/enable_auto_renewal', methods=['POST'])
+@login_required
+@membership_required
+def enable_auto_renewal():
+    user = User.query.get(current_user.id)
+    if not user or not user.stripe_customer_id:
+        flash('You do not have an active subscription.', 'error')
+        return redirect(url_for('index'))
+
+
+
+    try:
+
+        subscriptions = stripe.Subscription.list(customer=user.stripe_customer_id)
+        subscription_id = None
+        for subscription in subscriptions.auto_paging_iter():
+            # Assuming you store the Stripe Price ID in subscription_plan.stripe_price_id
+            if subscription['items']['data'][0]['price']['id'] == user.subscription_plan.stripe_price_id:
+                subscription_id = subscription['id']
+                break
+        
+        if not subscription_id:
+            flash('No active subscription found for cancellation.', 'error')
+            return redirect(url_for('index'))
+        
+        # Cancel the subscription at period's end
+        stripe.Subscription.modify(
+            subscription_id,
+            cancel_at_period_end=False
+        )
+
+        # Update your models as necessary
+        db.session.commit()
+
+        flash('Your subscription will be automatically renewed at the end of the current billing period.', 'success')
+    except Exception as e:
+        flash(f'An error occurred while Enabling Auto-Renewal your subscription: {e}', 'error')
+
     return redirect(url_for('index'))
 
 @app.route('/change_subscription/<string:new_plan_stripe_id>', methods=['POST'])
@@ -344,6 +372,9 @@ def change_subscription(new_plan_stripe_id):
     if not user:
         flash('No user found.', 'error')
         return redirect(url_for('choose_subscription'))
+    if is_payment_card_expired(user):
+        flash('Your payment card has expired. Please update your payment method.', 'error')
+        return redirect(url_for('update_card_details')) 
 
     # Fetch plans from Stripe
     plans = get_stripe_plans()
@@ -370,6 +401,7 @@ def change_subscription(new_plan_stripe_id):
     if user.subscription_plan and user.subscription_plan.expiration_date and user.subscription_plan.expiration_date > date.today():
         # Plan changes at the end of the current period
         user.subscription_plan.next_plan_id = subscription_plan.id
+        user.subscription_plan.cancel_at_period_end = True
         flash('Your subscription will be updated at the end of your current period.', 'success')
     else:
         # Update immediately if no active or expired plan
@@ -380,7 +412,71 @@ def change_subscription(new_plan_stripe_id):
     db.session.commit()
     return redirect(url_for('choose_subscription'))
 
+@app.route('/update_card_details', methods=['GET'])
+@login_required
+def update_card_details():
+    user = User.query.get(current_user.id)
+    try:
+        # Create a Stripe Checkout session for updating card details
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            customer=user.stripe_customer_id,
+            mode='setup',  # This mode is used for setting up or updating payment details
+            success_url=url_for('payment_method_success', _external=True)+ '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=url_for('handle_cancel', _external=True),
+        )
+        return redirect(session.url, code=303)
+    except Exception as e:
+        flash(f"Failed to initiate payment method update: {e}", 'error')
+        return redirect(url_for('choose_subscription'))
 
+@app.route('/payment_method_success')
+@login_required
+def payment_method_success():
+    session_id = request.args.get('session_id')
+    if not session_id:
+        flash('No payment session found.', 'error')
+        return redirect(url_for('choose_subscription'))
+
+    try:
+        # Retrieve the session and payment method from Stripe
+        session = stripe.checkout.Session.retrieve(session_id)
+        new_payment_method = stripe.PaymentMethod.retrieve(session.payment_method)
+
+        if not new_payment_method or new_payment_method.customer != session.customer:
+            flash('Mismatch in payment method details.', 'error')
+            return redirect(url_for('choose_subscription'))
+
+        # Detach all old payment methods except the new one
+        old_payment_methods = stripe.PaymentMethod.list(customer=session.customer, type="card")
+        for pm in old_payment_methods.data:
+            if pm.id != new_payment_method.id:
+                stripe.PaymentMethod.detach(pm.id)
+
+        # Update local database with new card expiry date
+        update_local_payment_method(current_user.id, new_payment_method.card.exp_month, new_payment_method.card.exp_year)
+
+        flash('Payment method updated successfully!', 'success')
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe API error: {e.user_message}")
+        flash(f"Stripe API error: {e.user_message}", 'error')
+        return redirect(url_for('choose_subscription'))
+    except Exception as e:
+        logger.error(f"Unhandled exception: {e}")
+        flash('An unexpected error occurred.', 'error')
+        return redirect(url_for('choose_subscription'))
+
+    return redirect(url_for('user_profile'))
+
+def update_local_payment_method(user_id, exp_month, exp_year):
+    # Find the latest or appropriate payment record to update
+    payment = Payment.query.filter_by(user_id=user_id).order_by(Payment.payment_date.desc()).first()
+    if payment:
+        payment.card_expiry_date = f"{exp_month}/{exp_year}"
+        db.session.commit()
+    else:
+        # Log or handle the scenario where no payment record is found
+        logger.error(f"No payment record found for user ID {user_id}")
 
 
 @app.route('/cancel_subscription', methods=['POST'])
@@ -610,45 +706,154 @@ def friends():
     return render_template('friends.html', friends=friends, requests=incoming_requests)
 
 
-@app.route('/add-journey', methods=['POST'])
-@login_required
-@membership_required
-def add_journey():
-    data = request.json
-    if not data:
-        app.logger.error('No JSON data received')
-        return jsonify({'message': 'No data received'}), 400
-    app.logger.info('Received data: %s', data)
-    new_journey = JourneyRecord(user_id=current_user.id,origin=data['origin'], destination=data['destination'],
-                          waypoints=data['waypoints'], time_taken=data['time_taken'])
-    db.session.add(new_journey)
-    db.session.commit()
-    return jsonify({'message': 'Journey added successfully'}),200
 
-
-@app.route('/gps', methods=['GET'])
+@app.route('/upload_gps', methods=['GET', 'POST'])
 @login_required
-@membership_required
-def gps_page():
-    # Fetch all journeys for the current user to display
+def upload_gps():
+    if request.method == 'POST':
+        file = request.files.get('gpsdata')
+        activity_type = request.form.get('type')
+        name = request.form.get('name')
+        start_time_user = request.form.get('startTime')
+        end_time_user = request.form.get('endTime')
+
+        if not file or not activity_type or not name:
+            flash('Missing required fields.', 'error')
+            return render_template('upload_gps.html')
+
+        try:
+            gpx = gpxpy.parse(file.stream)
+            coordinates = [{'lat': point.latitude, 'lon': point.longitude}
+                           for track in gpx.tracks
+                           for segment in track.segments
+                           for point in segment.points]
+
+            if not coordinates:
+                flash('No GPS data found in file.', 'error')
+                return render_template('upload_gps.html')
+
+            # Use user-provided times if available, otherwise extract from file
+            if start_time_user and end_time_user:
+                start_time = datetime.fromisoformat(start_time_user)
+                end_time = datetime.fromisoformat(end_time_user)
+            else:
+                start_time = min((point.time for track in gpx.tracks for segment in track.segments for point in segment.points), default=datetime.utcnow())
+                end_time = max((point.time for track in gpx.tracks for segment in track.segments for point in segment.points), default=datetime.utcnow())
+
+            journey = JourneyRecord(
+                user_id=current_user.id,
+                name=name,
+                type=activity_type,
+                start_time=start_time,
+                end_time=end_time,
+                data={'coordinates': coordinates}
+            )
+            db.session.add(journey)
+            db.session.commit()
+            flash('GPS Data successfully uploaded.', 'success')
+            return redirect(url_for('index'))
+        except Exception as e:
+            flash(f'Error processing file: {str(e)}', 'error')
+            return render_template('upload_gps.html')
+
+    else:
+        return render_template('upload_gps.html')
+
+@app.route('/journeys')
+@login_required
+def display_journeys():
     journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
-    return render_template('index.html', journeys=journeys)
+    return render_template('display_journey.html', journeys=journeys)
 
-
-
-
-@app.route('/userroute', methods=['GET'])
+@app.route('/api/journeys')
 @login_required
-@membership_required
-def user_route():
-    # Fetch all journeys for the current user to display
+def api_journeys():
     journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
-    # Serialize JourneyRecord objects to a JSON serializable format
-    serialized_journeys = [{
+    journeys_data = [{
         'id': journey.id,
-        'origin': journey.origin,
-        'destination': journey.destination,
-        'waypoints': journey.waypoints,
-        'time_taken': journey.time_taken
+        'name': journey.name,
+        'type': journey.type,
+        'duration': journey.calculate_duration(),
+        'distance': journey.calculate_distance(),
+        'calories': journey.calculate_calories_burned(),
+        'speed': journey.calculate_average_speed(),
+        'data': journey.data  # This should be a dict that includes 'coordinates' list
     } for journey in journeys]
-    return render_template('userroute.html', journeys=serialized_journeys)
+    return jsonify(journeys_data)
+
+@app.route('/list_journeys')
+@login_required
+def list_journeys():
+    user_journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
+    return render_template('list_journeys.html', journeys=user_journeys)
+
+@app.route('/list_journeys/view/<int:journey_id>')
+@login_required
+def view_journey(journey_id):
+    journey = JourneyRecord.query.get_or_404(journey_id)
+    return render_template('view_journey.html', journey=journey)
+
+@app.route('/list_journeys/delete/<int:journey_id>', methods=['POST'])
+@login_required
+def delete_journey(journey_id):
+    journey = JourneyRecord.query.get_or_404(journey_id)
+    db.session.delete(journey)
+    db.session.commit()
+    flash('Journey deleted successfully.', 'success')
+    return redirect(url_for('list_journeys'))
+
+@app.route('/download_journey/<int:journey_id>',methods=['GET'])
+@login_required
+def download_journey(journey_id):
+    journey = JourneyRecord.query.filter_by(id=journey_id, user_id=current_user.id).first()
+    if not journey:
+        flash('Journey not found.', 'error')
+        return redirect(url_for('list_journeys'))
+
+    # Decide the format based on user preference or use a query parameter
+    file_format = request.args.get('format', default='json')
+
+    if file_format == 'csv':
+        return download_as_csv(journey)
+    else:
+        return download_as_json(journey)
+    
+
+def download_as_json(journey):
+    journey_details = {
+        'id': journey.id,
+        'name': journey.name,
+        'type': journey.type,
+        'start_time': journey.start_time.isoformat(),
+        'end_time': journey.end_time.isoformat(),
+        'duration_hours': journey.calculate_duration(),
+        'distance_km': journey.calculate_distance(),
+        'calories_burned': journey.calculate_calories_burned(),
+        'average_speed_km_h': journey.calculate_average_speed(),
+        'coordinates': journey.data.get('coordinates', [])
+    }
+    response = jsonify(journey_details)
+    response.headers['Content-Disposition'] = f'attachment; filename=journey_{journey.id}.json'
+    return response
+
+def download_as_csv(journey):
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['ID', 'Name', 'Type', 'Start Time', 'End Time', 'Duration (Hours)', 'Distance (km)', 'Calories Burned', 'Average Speed (km/h)', 'Coordinates'])
+    cw.writerow([
+        journey.id,
+        journey.name,
+        journey.type,
+        journey.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+        journey.end_time.strftime('%Y-%m-%d %H:%M:%S'),
+        f"{journey.calculate_duration():.2f}",
+        f"{journey.calculate_distance():.2f}",
+        f"{journey.calculate_calories_burned():.2f}",
+        f"{journey.calculate_average_speed():.2f}",
+        '; '.join(f"{coord['lat']},{coord['lon']}" for coord in journey.data.get('coordinates', []))
+    ])
+    
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = f"attachment; filename=journey_{journey.id}.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output

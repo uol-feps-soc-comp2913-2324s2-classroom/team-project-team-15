@@ -1,25 +1,32 @@
-<!-- templates/display_journeys.html -->
+<!-- templates/view_journey.html -->
 {% extends 'base.html' %}
 
 {% block navbar %}
 <nav id="navbar">
-    <a href="{{ url_for('list_journeys') }}" class="nav-button">Journey List</a>
     <a href="{{ url_for('upload_gps') }}" class="nav-button">Add Journey</a>
     <a href="{{ url_for('friends') }}" class="nav-button">Friends</a>
+    <a href="{{ url_for('display_journeys') }}" class="nav-button">Home</a>
     <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
 
 </nav>
 {% endblock %}
 
 {% block body %}
-<style>
-    #map {
-        height: 500px;
-        /* Ensure the map has a specific height */
-        width: 100%;
-        /* Full width */
-    }
-</style>
+<h2>Journey Details: {{ journey.name }}</h2>
+<p>Type: {{ journey.type }}</p>
+<p>Duration: {{ journey.duration }}</p>
+<p>Distance: {{ journey.distance }}</p>
+<p>Speed: {{ journey.speed}}</p>
+<p>Calories: {{ journey.calories }}</p>
+
+<div class="download-buttons">
+    <a href="{{ url_for('download_journey', journey_id=journey.id, format='json') }}" class="btn btn-primary">Download
+        JSON</a>
+    <a href="{{ url_for('download_journey', journey_id=journey.id, format='csv') }}" class="btn btn-secondary">Download
+        CSV</a>
+</div>
+
+<div id="map" style="height: 400px;"></div>
 
 <div id="map"></div>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -81,5 +88,4 @@
 
     });
 </script>
-
 {% endblock %}

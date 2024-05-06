@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
+import math
 
 
 friends = db.Table('friends',
@@ -51,14 +52,47 @@ class FriendRequest(db.Model):
 class JourneyRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    origin= db.Column(db.String(100))
-    destination = db.Column(db.String(100))
-    waypoints = db.Column(db.String(500)) # Stored as a JSON string
-    time_taken = db.Column(db.Integer) # Assume time is in minutes
+    name = db.Column(db.String(100)) 
+    type = db.Column(db.String(10))  # 'running' or 'cycling'
+    start_time = db.Column(db.DateTime)
+    end_time = db.Column(db.DateTime)
+    data = db.Column(db.JSON)  # Storing GPS data and possibly other metadata as JSON
 
-    def __repr__(self):
-        return f"<Journey {self.origin} to {self.destination}>"
+    def calculate_duration(self):
+        return (self.end_time - self.start_time).total_seconds() / 3600  # duration in hours
 
+    def calculate_distance(self):
+        # Assuming data contains a list of coordinates
+        distance = 0
+        coordinates = self.data.get('coordinates', [])
+        for i in range(1, len(coordinates)):
+            distance += haversine(coordinates[i-1], coordinates[i])
+        return distance  # distance in kilometers
+
+    def calculate_calories_burned(self):
+        # Basic formula; should be refined based on more inputs like user weight, age, etc.
+        if self.type == 'running':
+            return 100 * self.calculate_distance()  # 100 kcal per km
+        elif self.type == 'cycling':
+            return 50 * self.calculate_distance()  # 50 kcal per km
+
+    def calculate_average_speed(self):
+        return self.calculate_distance() / self.calculate_duration()  # speed in km/h
+
+
+def haversine(coord1, coord2):
+    lat1, lon1 = float(coord1['lat']), float(coord1['lon'])
+    lat2, lon2 = float(coord2['lat']), float(coord2['lon']) # Convert coordinates to float
+    radius = 6371  # Earth radius in kilometers
+
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2) * math.sin(dlat / 2) + \
+        math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * \
+        math.sin(dlon / 2) * math.sin(dlon / 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = radius * c
+    return distance
 
 
 class SubscriptionPlan(db.Model):
@@ -82,6 +116,17 @@ class Payment(db.Model):
     stripe_session_id= db.Column(db.String(255),nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     user= db.relationship('User',backref=db.backref('payments',lazy=True))
+    payment_method_type = db.Column(db.String(50), nullable=True)  # e.g., 'card'
+    card_expiry_date = db.Column(db.String(10), nullable=True)
+
+    def update_status(self, new_status):
+        self.payment_status = new_status
+        db.session.commit()
+
+    def set_card_details(self, card_type, expiry_date):
+        self.payment_method_type = card_type
+        self.card_expiry_date = expiry_date
+        db.session.commit()
 
 class RevenueEstimate(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% endblock %}
+{% block navbar %}
+<nav id="navbar">
+    <a href="{{ url_for('list_journeys') }}" class="nav-button">Journey List</a>
+    <a href="{{ url_for('friends') }}" class="nav-button">Friends</a>
+    <a href="{{ url_for('display_journeys') }}" class="nav-button">Home</a>
+    <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
+
+</nav>
+{% endblock %}
+
+{% block body %}
+<form action="{{ url_for('upload_gps') }}" method="post" enctype="multipart/form-data" class="p-3 border bg-light">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+    <div class="mb-3">
+        <label for="name" class="form-label">Name:</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="gpsdata" class="form-label">GPS Data File:</label>
+        <input type="file" class="form-control" id="gpsdata" name="gpsdata" required required
+            onchange="parseGPXFile(event)">
+    </div>
+
+    <div class="mb-3">
+        <label for="type" class="form-label">Activity Type:</label>
+        <select class="form-select" id="type" name="type">
+            <option value="running">Running</option>
+            <option value="cycling">Cycling</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="startTime" class="form-label">Start Time:</label>
+        <input type="datetime-local" class="form-control" id="startTime" name="startTime" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="endTime" class="form-label">End Time:</label>
+        <input type="datetime-local" class="form-control" id="endTime" name="endTime" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Upload GPS Data</button>
+</form>
+
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+
+<script>
+    function parseGPXFile(event) {
+        console.log("File input changed");  // Check if the function is triggered
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                console.log("File loaded");  // Check if file reading is successful
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(e.target.result, "application/xml");
+                console.log(xmlDoc);  // Check if XML is parsed correctly
+                const timeElements = xmlDoc.getElementsByTagName('time');
+                if (timeElements.length > 0) {
+                    const startTime = timeElements[0].textContent;
+                    const endTime = timeElements[timeElements.length - 1].textContent;
+                    document.getElementById('startTime').value = formatDateTime(startTime);
+                    document.getElementById('endTime').value = formatDateTime(endTime);
+                    console.log(startTime, endTime);  // Verify the extracted times
+                }
+            };
+            reader.readAsText(file);
+        }
+    }
+
+    function formatDateTime(dateTimeStr) {
+        console.log("Formatting date:", dateTimeStr);  // Check the incoming date string
+        const date = new Date(dateTimeStr);
+        const formattedDate = date.toISOString().slice(0, 16);
+        console.log("Formatted date:", formattedDate);  // Check the formatted date
+        return formattedDate;
+    }
+
+</script>
+
+{% endblock %}
