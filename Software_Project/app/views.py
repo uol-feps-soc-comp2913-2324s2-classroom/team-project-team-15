@@ -857,3 +857,31 @@ def download_as_csv(journey):
     output.headers["Content-Disposition"] = f"attachment; filename=journey_{journey.id}.csv"
     output.headers["Content-type"] = "text/csv"
     return output
+
+
+@app.route('/api/friends/latest-journeys', methods=['GET'])
+@login_required
+def get_latest_journeys():
+    friends = current_user.friends 
+    latest_journeys = []
+    for friend in friends:
+        latest_journey = JourneyRecord.query.filter_by(user_id=friend.id).order_by(JourneyRecord.end_time.desc()).first()
+        if latest_journey:
+             latest_journeys.append({
+                'user_id': friend.id,
+                'username': friend.username,
+                'journey_id': latest_journey.id,
+                'name': latest_journey.name,
+                'type': latest_journey.type,
+                'duration': latest_journey.calculate_duration(),
+                'distance': latest_journey.calculate_distance(),
+                'calories': latest_journey.calculate_calories_burned(),
+                'speed': latest_journey.calculate_average_speed(),
+                'coordinates': latest_journey.data.get('coordinates', [])
+            })
+
+    return jsonify(latest_journeys)
+
+@app.route('/view-friends-journeys')
+def view_friends_journeys():
+    return render_template('shared_map.html')
