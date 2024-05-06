@@ -1,6 +1,10 @@
 <!-- templates/display_journeys.html -->
 {% extends 'base.html' %}
 
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
 {% block navbar %}
 <nav id="navbar">
     <a href="{{ url_for('list_journeys') }}" class="nav-button">Journey List</a>
@@ -18,6 +22,37 @@
         /* Ensure the map has a specific height */
         width: 100%;
         /* Full width */
+    }
+
+    #distanceTimeChart {
+        width: 600px;
+        /* Set the width of the canvas */
+        height: 450px;
+        /* Set the height of the canvas */
+        border: 2px solid #ddd;
+        /* Add a border around the canvas */
+        background-color: #f4f4f4;
+        /* Set a background color */
+        display: block;
+        /* Ensures the canvas is a block element */
+        margin: 20px auto;
+        /* Center the canvas horizontally */
+    }
+
+
+    #activityTypeChart {
+        width: 300px;
+        /* Set the width of the canvas */
+        height: 225px;
+        /* Set the height of the canvas */
+        border: 2px solid #ddd;
+        /* Add a border around the canvas */
+        background-color: #f4f4f4;
+        /* Set a background color */
+        display: block;
+        /* Ensures the canvas is a block element */
+        margin: 20px auto;
+        /* Center the canvas horizontally */
     }
 </style>
 
@@ -70,16 +105,112 @@
             .catch(error => console.error('Error fetching or processing journeys:', error));
 
         function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
+            const colors = [
+                "#00429d", "#8c2981", "#fe6100", "#5d2b76", "#4cb5ae",
+                "#007d34", "#c0369d", "#f13c1e", "#232c16", "#ca0147",
+                "#00a9cf", "#a79d00", "#6b4423", "#e6194b", "#3cb44b"
+            ];
 
+
+            // Randomly pick a color from the array
+            return colors[Math.floor(Math.random() * colors.length)];
         }
 
     });
 </script>
+<div id="stats">
+    <h3>Stats</h3>
+    <p id="totalCalories">Total Calories: 0 kcal</p>
+    <p id="totalDistance">Total Distance: 0 km</p>
+    <div id="distanceByType"></div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/journeys_stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalCalories').textContent = `Total Calories: ${data.total_calories.toFixed(2)} kcal`;
+                document.getElementById('totalDistance').textContent = `Total Distance: ${data.total_distance.toFixed(2)} km`;
+
+                const distanceByTypeDiv = document.getElementById('distanceByType');
+                distanceByTypeDiv.innerHTML = '';
+                Object.keys(data.distance_by_type).forEach(type => {
+                    const p = document.createElement('p');
+                    p.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Distance: ${data.distance_by_type[type].toFixed(2)} km`;
+                    distanceByTypeDiv.appendChild(p);
+                });
+            })
+            .catch(error => console.error('Error fetching or processing journeys:', error));
+    });
+
+</script>
+<div>
+    <canvas id="distanceTimeChart"></canvas>
+    <canvas id="activityTypeChart"></canvas>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/journeys')
+            .then(response => response.json())
+            .then(data => {
+                // Prepare the data for the distance over time chart
+                const labels = data.map(journey => journey.name); // Use journey names as labels
+                const distances = data.map(journey => journey.distance);
+                const calories = data.map(journey => journey.calories);
+
+                // Line Chart for Distance Over Time
+                const ctxDistance = document.getElementById('distanceTimeChart').getContext('2d');
+                const distanceTimeChart = new Chart(ctxDistance, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Distance (km)',
+                                data: distances,
+                                borderColor: 'rgb(75, 192, 192)',
+                                tension: 0.1
+                            },
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // Pie Chart for Activity Types
+                const typeCounts = data.reduce((acc, journey) => {
+                    acc[journey.type] = (acc[journey.type] || 0) + 1;
+                    return acc;
+                }, {});
+                console.log('Type counts:', typeCounts);
+
+                const ctxType = document.getElementById('activityTypeChart').getContext('2d');
+                if (!ctxType) {
+                    console.error('The canvas context could not be found.');
+                    return;
+                }
+                const activityTypeChart = new Chart(ctxType, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(typeCounts),
+                        datasets: [{
+                            data: Object.values(typeCounts),
+                            backgroundColor: ['rgb(255, 205, 86)', 'rgb(54, 162, 235)'],
+                            hoverOffset: 4
+                        }]
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching or processing journeys:', error));
+    });
+</script>
+
+
 
 {% endblock %}
