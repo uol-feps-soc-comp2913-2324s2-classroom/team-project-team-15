@@ -1,8 +1,9 @@
+import io
 import json
 from operator import or_
 import re
 from venv import logger
-from flask import render_template, redirect, url_for, flash, request,session,jsonify, current_app
+from flask import make_response, render_template, redirect, url_for, flash, request,session,jsonify, current_app, Response
 import gpxpy
 from app import app, db
 from app.models import SubscriptionPlan, User,Payment, FriendRequest, JourneyRecord
@@ -16,6 +17,7 @@ import stripe
 import logging
 from datetime import date, datetime, timedelta
 from functools import wraps
+import csv
 stripe.api_key = 'sk_test_51OubkTGiwWWmEjuUTmrjuRowLjdmFXb365kmtoD0YRLYf7rYKIVhFBIEwn3ozE4O1TMSIqcHa9WIk07RcbIqfErC00DyV65frs'
 
 
@@ -704,67 +706,56 @@ def friends():
     return render_template('friends.html', friends=friends, requests=incoming_requests)
 
 
-@app.route('/add-journey', methods=['POST'])
-@login_required
-@membership_required
-def add_journey():
-    data = request.json
-    if not data:
-        app.logger.error('No JSON data received')
-        return jsonify({'message': 'No data received'}), 400
-    app.logger.info('Received data: %s', data)
-    new_journey = JourneyRecord(user_id=current_user.id,origin=data['origin'], destination=data['destination'],
-                          waypoints=data['waypoints'], time_taken=data['time_taken'])
-    db.session.add(new_journey)
-    db.session.commit()
-    return jsonify({'message': 'Journey added successfully'}),200
-
-
-@app.route('/gps', methods=['GET'])
-@login_required
-@membership_required
-def gps_page():
-    # Fetch all journeys for the current user to display
-    journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
-    return render_template('index.html', journeys=journeys)
-
-
-
-
-@app.route('/userroute', methods=['GET'])
-@login_required
-@membership_required
-def user_route():
-    # Fetch all journeys for the current user to display
-    journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
-    # Serialize JourneyRecord objects to a JSON serializable format
-    serialized_journeys = [{
-        'id': journey.id,
-        'origin': journey.origin,
-        'destination': journey.destination,
-        'waypoints': journey.waypoints,
-        'time_taken': journey.time_taken
-    } for journey in journeys]
-    return render_template('userroute.html', journeys=serialized_journeys)
-
 
 @app.route('/upload_gps', methods=['GET', 'POST'])
 @login_required
 def upload_gps():
     if request.method == 'POST':
         file = request.files.get('gpsdata')
-        type = request.form.get('type')
-        if file and type:
+        activity_type = request.form.get('type')
+        name = request.form.get('name')
+        start_time_user = request.form.get('startTime')
+        end_time_user = request.form.get('endTime')
+
+        if not file or not activity_type or not name:
+            flash('Missing required fields.', 'error')
+            return render_template('upload_gps.html')
+
+        try:
             gpx = gpxpy.parse(file.stream)
-            coordinates = [{'lat': point.latitude, 'lon': point.longitude} for track in gpx.tracks for segment in track.segments for point in segment.points]
-            start_time = min((point.time for track in gpx.tracks for segment in track.segments for point in segment.points), default=datetime.utcnow())
-            end_time = max((point.time for track in gpx.tracks for segment in track.segments for point in segment.points), default=datetime.utcnow())
-            
-            journey = JourneyRecord(user_id=current_user.id, type=type, start_time=start_time, end_time=end_time, data={'coordinates': coordinates})
+            coordinates = [{'lat': point.latitude, 'lon': point.longitude}
+                           for track in gpx.tracks
+                           for segment in track.segments
+                           for point in segment.points]
+
+            if not coordinates:
+                flash('No GPS data found in file.', 'error')
+                return render_template('upload_gps.html')
+
+            # Use user-provided times if available, otherwise extract from file
+            if start_time_user and end_time_user:
+                start_time = datetime.fromisoformat(start_time_user)
+                end_time = datetime.fromisoformat(end_time_user)
+            else:
+                start_time = min((point.time for track in gpx.tracks for segment in track.segments for point in segment.points), default=datetime.utcnow())
+                end_time = max((point.time for track in gpx.tracks for segment in track.segments for point in segment.points), default=datetime.utcnow())
+
+            journey = JourneyRecord(
+                user_id=current_user.id,
+                name=name,
+                type=activity_type,
+                start_time=start_time,
+                end_time=end_time,
+                data={'coordinates': coordinates}
+            )
             db.session.add(journey)
             db.session.commit()
+            flash('GPS Data successfully uploaded.', 'success')
             return redirect(url_for('index'))
-        return render_template('upload_gps.html', error="Invalid file or type")
+        except Exception as e:
+            flash(f'Error processing file: {str(e)}', 'error')
+            return render_template('upload_gps.html')
+
     else:
         return render_template('upload_gps.html')
 
@@ -780,6 +771,89 @@ def api_journeys():
     journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
     journeys_data = [{
         'id': journey.id,
+        'name': journey.name,
+        'type': journey.type,
+        'duration': journey.calculate_duration(),
+        'distance': journey.calculate_distance(),
+        'calories': journey.calculate_calories_burned(),
+        'speed': journey.calculate_average_speed(),
         'data': journey.data  # This should be a dict that includes 'coordinates' list
     } for journey in journeys]
     return jsonify(journeys_data)
+
+@app.route('/list_journeys')
+@login_required
+def list_journeys():
+    user_journeys = JourneyRecord.query.filter_by(user_id=current_user.id).all()
+    return render_template('list_journeys.html', journeys=user_journeys)
+
+@app.route('/list_journeys/view/<int:journey_id>')
+@login_required
+def view_journey(journey_id):
+    journey = JourneyRecord.query.get_or_404(journey_id)
+    return render_template('view_journey.html', journey=journey)
+
+@app.route('/list_journeys/delete/<int:journey_id>', methods=['POST'])
+@login_required
+def delete_journey(journey_id):
+    journey = JourneyRecord.query.get_or_404(journey_id)
+    db.session.delete(journey)
+    db.session.commit()
+    flash('Journey deleted successfully.', 'success')
+    return redirect(url_for('list_journeys'))
+
+@app.route('/download_journey/<int:journey_id>',methods=['GET'])
+@login_required
+def download_journey(journey_id):
+    journey = JourneyRecord.query.filter_by(id=journey_id, user_id=current_user.id).first()
+    if not journey:
+        flash('Journey not found.', 'error')
+        return redirect(url_for('list_journeys'))
+
+    # Decide the format based on user preference or use a query parameter
+    file_format = request.args.get('format', default='json')
+
+    if file_format == 'csv':
+        return download_as_csv(journey)
+    else:
+        return download_as_json(journey)
+    
+
+def download_as_json(journey):
+    journey_details = {
+        'id': journey.id,
+        'name': journey.name,
+        'type': journey.type,
+        'start_time': journey.start_time.isoformat(),
+        'end_time': journey.end_time.isoformat(),
+        'duration_hours': journey.calculate_duration(),
+        'distance_km': journey.calculate_distance(),
+        'calories_burned': journey.calculate_calories_burned(),
+        'average_speed_km_h': journey.calculate_average_speed(),
+        'coordinates': journey.data.get('coordinates', [])
+    }
+    response = jsonify(journey_details)
+    response.headers['Content-Disposition'] = f'attachment; filename=journey_{journey.id}.json'
+    return response
+
+def download_as_csv(journey):
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['ID', 'Name', 'Type', 'Start Time', 'End Time', 'Duration (Hours)', 'Distance (km)', 'Calories Burned', 'Average Speed (km/h)', 'Coordinates'])
+    cw.writerow([
+        journey.id,
+        journey.name,
+        journey.type,
+        journey.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+        journey.end_time.strftime('%Y-%m-%d %H:%M:%S'),
+        f"{journey.calculate_duration():.2f}",
+        f"{journey.calculate_distance():.2f}",
+        f"{journey.calculate_calories_burned():.2f}",
+        f"{journey.calculate_average_speed():.2f}",
+        '; '.join(f"{coord['lat']},{coord['lon']}" for coord in journey.data.get('coordinates', []))
+    ])
+    
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = f"attachment; filename=journey_{journey.id}.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output

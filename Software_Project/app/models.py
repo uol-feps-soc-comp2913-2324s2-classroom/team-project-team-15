@@ -52,6 +52,7 @@ class FriendRequest(db.Model):
 class JourneyRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    name = db.Column(db.String(100)) 
     type = db.Column(db.String(10))  # 'running' or 'cycling'
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
@@ -80,17 +81,18 @@ class JourneyRecord(db.Model):
 
 
 def haversine(coord1, coord2):
-        lat1, lon1 = coord1
-        lat2, lon2 = coord2
-        radius = 6371  # Earth radius in kilometers
+    lat1, lon1 = float(coord1['lat']), float(coord1['lon'])
+    lat2, lon2 = float(coord2['lat']), float(coord2['lon']) # Convert coordinates to float
+    radius = 6371  # Earth radius in kilometers
 
-        dlat = math.radians(lat2 - lat1)
-        dlon = math.radians(lon2 - lon1)
-        a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
-            * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-        distance = radius * c
-        return distance
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2) * math.sin(dlat / 2) + \
+        math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * \
+        math.sin(dlon / 2) * math.sin(dlon / 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = radius * c
+    return distance
 
 
 class SubscriptionPlan(db.Model):

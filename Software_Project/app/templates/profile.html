@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,18 +21,22 @@
             border: 4px solid #ff6600;
             object-fit: cover;
         }
+
         .user-details {
             list-style-type: none;
             padding: 0;
         }
+
         .user-details li {
             margin: 15px;
             color: #495057;
         }
+
         .user-details li span {
             font-weight: bold;
             color: #ff6600;
         }
+
         .user-details li button {
             background-color: #ff6600;
             border: none;
@@ -41,20 +46,24 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         .user-details li button:hover {
             background-color: #ff6600;
         }
+
         .navbar {
             background-color: #fff;
             border: none;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
         }
+
         .navbar-nav .nav-link {
             color: #495057;
             padding: 10px;
             transition: background-color 0.3s ease;
         }
+
         .navbar-nav .nav-link:hover {
             background-color: #f8f9fa;
         }
@@ -71,9 +80,10 @@
             background: rgba(0, 0, 0, 0.7);
             z-index: 999;
         }
+
         .popup-form1 {
             width: 390px;
-            
+
             justify-content: center;
             background: white;
             text-align: center;
@@ -104,20 +114,21 @@
             box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
         }
 
-        .closeBtn img{
+        .closeBtn img {
             width: 40px;
         }
+
         .closeBtn {
             position: absolute;
-            top: 0; 
-            right: 0; 
-            cursor: pointer; 
+            top: 0;
+            right: 0;
+            cursor: pointer;
             border-radius: 0 0 0 20px;
             border-bottom: 3px solid #ff6600;
             border-left: 3px solid #ff6600;
         }
 
-        .submitBtn{
+        .submitBtn {
             font-size: 1rem;
             margin-top: 0.8rem;
             margin-bottom: 0.6rem;
@@ -131,24 +142,27 @@
             cursor: pointer;
         }
 
-        .submitBtn:hover{
+        .submitBtn:hover {
             background: #b35f007f;
         }
 
 
-        .content{
+        .content {
             text-align: left;
         }
-        .content2{
+
+        .content2 {
             margin: 0;
         }
-        .main-div{
+
+        .main-div {
             display: flex;
             justify-content: center;
             background-color: rgba(183, 183, 183, 0.615);
             border-radius: 10px;
         }
-        .btn.btn-primary.ml-3:hover{
+
+        .btn.btn-primary.ml-3:hover {
             background: #b35f007f;
         }
 
@@ -202,7 +216,7 @@
             text-align: center;
         }
 
-        .description{
+        .description {
             font-size: 70%;
         }
 
@@ -250,36 +264,36 @@
             display: table;
             clear: both;
         }
-
-
     </style>
 </head>
+
 <body>
     <div class="member">
         Not a member? <a href="#" onclick="SignUp()">Register Here</a>
-     </div>
+    </div>
     <div class="overlay1" id="overlay1"></div>
     <div class="popup-form1" id="popupForm1" style="display: none;">
         <a class="closeBtn" id="closeForm1" tabindex="4">
-          <img src="{{ url_for('static', filename='cross.png') }}">
+            <img src="{{ url_for('static', filename='cross.png') }}">
         </a>
         <h1>Profile</h1>
         <div class="content2">
             <img src="user-image.jpg" alt="User Image" class="user-image">
         </div>
-            <div class="main-div">
-                <div class="content">
-                    <ul class="user-details">
-                        <li><span>First Name:</span> John</li>
-                        <li><span>Last Name:</span> Doe</li>
-                        <li><span>Date of Birth:</span> 01/01/1990</li>
-                        <li><span>Email:</span> john.doe@example.com</li>
-                        <li><span>Phone Number:</span> +1 123 456 7890</li>
-                        <li><span>Subscription Plan:</span> Monthly<button class="btn btn-primary ml-3" onclick="SubBox()">Change</button></li>
-                    </ul>
-                </div>
+        <div class="main-div">
+            <div class="content">
+                <ul class="user-details">
+                    <li><span>First Name:</span> John</li>
+                    <li><span>Last Name:</span> Doe</li>
+                    <li><span>Date of Birth:</span> 01/01/1990</li>
+                    <li><span>Email:</span> john.doe@example.com</li>
+                    <li><span>Phone Number:</span> +1 123 456 7890</li>
+                    <li><span>Subscription Plan:</span> Monthly<a href="{{ url_for('choose_subscription') }}"
+                            class="btn btn-primary ml-3">Change</a></button></li>
+                </ul>
             </div>
-          <button onclick="SignUp2()" type="submit" class="submitBtn" tabindex="3" >Logout</button>
+        </div>
+        <button onclick="SignUp2()" type="submit" class="submitBtn" tabindex="3">Logout</button>
         </form>
     </div>
 
@@ -310,7 +324,7 @@
             <form action="{{ url_for('choose_subscription') }}" method="POST">
                 <h2>Annually</h2>
                 <p class="price">£99.99</p>
-                <p class="description"§>(Excl. VAT)</p>
+                <p class="description" §>(Excl. VAT)</p>
                 <input type="hidden" name="subscription_plan" value="annually">
                 <button type="submit" name="submit" value="annually">Choose</button>
             </form>
@@ -325,14 +339,14 @@
 
 
     <script>
-        function SubBox(){
+        function SubBox() {
             const form1 = document.getElementById("popupForm1");
             const form2 = document.getElementById("popupForm2");
             const overlay1 = document.getElementById("overlay1");
             const closeFormButton2 = document.getElementById("closeForm2");
             form1.style.display = "none";
             form2.style.display = "block";
-            
+
 
             // If close button is clicked, the form, overlay should disappear
             closeFormButton2.addEventListener("click", function () {
@@ -342,7 +356,7 @@
         }
 
 
-        function SignUp(){
+        function SignUp() {
             const form1 = document.getElementById("popupForm1");
             const overlay1 = document.getElementById("overlay1");
             const closeFormButton1 = document.getElementById("closeForm1");
@@ -358,4 +372,5 @@
         }
     </script>
 </body>
+
 </html>

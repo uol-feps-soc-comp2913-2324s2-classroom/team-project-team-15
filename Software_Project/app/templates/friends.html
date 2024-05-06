@@ -2,7 +2,9 @@
 
 {% block navbar %}
 <nav id="navbar">
-    <a href="{{ url_for('index') }}" class="nav-button">Home</a>
+    <a href="{{ url_for('index') }}" class="nav-button">Journey List</a>
+    <a href="{{ url_for('upload_gps') }}" class="nav-button">Add Journey</a>
+    <a href="{{ url_for('display_journeys') }}" class="nav-button">Home</a>
     <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
 
 </nav>
