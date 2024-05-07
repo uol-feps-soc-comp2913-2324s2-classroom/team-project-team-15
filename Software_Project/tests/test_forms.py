@@ -5,6 +5,7 @@ import pytest
 import stripe
 from app import app, db
 from app.models import User,FriendRequest
+from werkzeug.security import generate_password_hash
 
 
 def delete_test_data():
@@ -26,7 +27,7 @@ def captured_templates(app):
         template_rendered.disconnect(record, app)     
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def client():
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False
@@ -137,3 +138,29 @@ def test_login_unsuccessful(client):
     assert login_response.status_code == 200
     assert b'Invalid username or password' in login_response.data
 
+@pytest.fixture 
+def init_database():
+    user1 = User(username='john', email='john@example.com', password_hash=generate_password_hash('test'))
+    user2 = User(username='jane', email='jane@example.com', password_hash=generate_password_hash('test'))
+    db.session.add_all([user1, user2])
+    db.session.commit()
+    return user1, user2
+
+@pytest.fixture (scope='module')
+def login_client(client, init_database):
+    user1, _ = init_database
+    with client:
+        client.post('/login', data={'username': user1.username, 'password': 'test'})
+        yield client
+
+def test_send_friend_request(login_client, init_database):
+    _, user2 = init_database
+    # Test sending friend request
+    response = login_client.post(f'/send-friend-request/{user2.id}')
+    assert response.status_code == 200
+    assert 'Friend request sent successfully' in response.get_json()['message']
+
+    # Test sending duplicate friend request
+    response = login_client.post(f'/send-friend-request/{user2.id}')
+    assert response.status_code == 400
+    assert 'Friend request already sent' in response.get_json()['error']
