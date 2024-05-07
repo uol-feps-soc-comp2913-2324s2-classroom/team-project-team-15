@@ -829,6 +829,23 @@ def view_journey(journey_id):
     journey = JourneyRecord.query.get_or_404(journey_id)
     return render_template('view_journey.html', journey=journey)
 
+@app.route('/api/journeys/<int:journey_id>')
+@login_required
+def api_journeys_view(journey_id):
+    journey = JourneyRecord.query.get_or_404(journey_id)
+    journeys_data = {
+        'id': journey.id,
+        'name': journey.name,
+        'type': journey.type,
+        'duration': journey.calculate_duration(),
+        'distance': journey.calculate_distance(),
+        'calories': journey.calculate_calories_burned(),
+        'speed': journey.calculate_average_speed(),
+        'data': journey.data  # This should be a dict that includes 'coordinates' list
+    }
+    return jsonify(journeys_data)
+
+
 @app.route('/list_journeys/delete/<int:journey_id>', methods=['POST'])
 @login_required
 def delete_journey(journey_id):

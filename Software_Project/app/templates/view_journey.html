@@ -3,32 +3,251 @@
 
 {% block navbar %}
 <nav id="navbar">
-    <a href="{{ url_for('upload_gps') }}" class="nav-button">Add Journey</a>
-    <a href="{{ url_for('friends') }}" class="nav-button">Friends</a>
-    <a href="{{ url_for('display_journeys') }}" class="nav-button">Home</a>
+    <a href="{{ url_for('list_journeys') }}" class="icon-button"><i class='bx bx-list-ul'></i></a>
+    <a href="{{ url_for('upload_gps') }}" class="icon-button"><i class='bx bx-message-square-add'></i></a>
+    <a href="{{ url_for('friends') }}" class="icon-button"><i class='bx bxs-group'></i></a>
+    <a href="{{ url_for('display_journeys') }}" class="icon-button"><i class='bx bx-trip'></i></a>
     <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
 
 </nav>
 {% endblock %}
 
 {% block body %}
-<h2>Journey Details: {{ journey.name }}</h2>
-<p>Type: {{ journey.type }}</p>
-<p>Duration: {{ journey.duration }}</p>
-<p>Distance: {{ journey.distance }}</p>
-<p>Speed: {{ journey.speed}}</p>
-<p>Calories: {{ journey.calories }}</p>
+<style>
+    /* Set up the cards container to display as a vertical bar */
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+        /* Allows items to wrap */
+        justify-content: space-around;
+        align-items: flex-start;
+        padding: 0px;
+        gap: 45px;
+        /* Spacing between columns */
+    }
 
-<div class="download-buttons">
-    <a href="{{ url_for('download_journey', journey_id=journey.id, format='json') }}" class="btn btn-primary">Download
-        JSON</a>
-    <a href="{{ url_for('download_journey', journey_id=journey.id, format='csv') }}" class="btn btn-secondary">Download
-        CSV</a>
+    .cards-column {
+        flex: 1 1 300px;
+        /* Flexibility with basis of 300px */
+        max-width: 300px;
+        /* Maximum width of the cards column */
+    }
+
+    .map-column {
+        flex: 2 1 600px;
+        /* Flexibility with basis of 600px */
+        max-width: 100%;
+        /* Allows it to grow */
+        display: flex;
+        /* Enables flexbox layout */
+        justify-content: center;
+        /* Centers content horizontally */
+        align-items: center;
+        /* Centers content vertically */
+        padding: 0px;
+    }
+
+    .cards1 {
+        display: flex;
+        flex-direction: column;
+        /* Aligns children vertically */
+        align-items: left;
+        /* Centers cards horizontally */
+        gap: 20px;
+        /* Spacing between each card */
+        flex-wrap: wrap;
+    }
+
+    /* Style for each card */
+    .card1 {
+        /* Vertical center alignment within each card */
+        background-color: #f9f9f9;
+        /* Light grey background for cards */
+        border: 1px solid #ff6600;
+        /* Subtle border */
+        border-radius: 8px;
+        /* Rounded corners */
+        padding: 15px;
+        /* Padding inside each card */
+        width: 300px;
+        /* Fixed width for consistency */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        /* Soft shadow for depth */
+    }
+
+    .cards1 .card1 {
+        padding: 15px;
+    }
+
+
+
+    #map {
+        width: 100%;
+        /* Full width of its container */
+        height: 100%;
+        /* Fixed height for the map */
+
+    }
+
+    /* Card styling for the map */
+    .map-card {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #cccccc;
+        /* Card-like border */
+        background-color: #ff6600;
+        /* Light grey background for cards */
+        border-radius: 8px;
+        /* Rounded corners */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        /* Soft shadow for depth */
+        padding: 10px;
+        /* Padding around the map */
+        margin: 20px;
+        /* Margin around the card to separate from other elements */
+        height: 500px;
+        /* Fixed height for the map */
+        width: 60%;
+        /* Adjust width as necessary */
+        flex-wrap: wrap;
+        flex-direction: row;
+        align-content: space-around;
+    }
+
+    .btn-info {
+        color: #fff;
+        /* White text color for better contrast on darker backgrounds */
+        background: linear-gradient(45deg, #ff6600, #ff1e00);
+        /* Gradient background for visual interest */
+        border: none;
+        /* Remove border for a smoother look */
+        padding: 5px 7.5px;
+        /* Adequate padding for a better click area */
+        border-radius: 6px;
+        /* Rounded corners for a modern look */
+        cursor: pointer;
+        /* Cursor indicates a clickable element */
+        font-size: 13px;
+        /* Slightly larger font for readability */
+        font-weight: bold;
+        /* Bold text for emphasis */
+        letter-spacing: 0.05em;
+        /* Spacing out letters for better readability */
+        text-transform: uppercase;
+        /* Uppercase text for a more stylized appearance */
+        transition: transform 0.3s, box-shadow 0.3s;
+        /* Smooth transitions for interactive feedback */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        /* Soft shadow for 3D effect */
+        outline: none;
+    }
+
+    .btn-info:hover,
+    .btn-info:focus {
+        transform: translateY(-3px);
+        /* Slight lift effect on hover */
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        /* Enhanced shadow on hover for a 'popping' effect */
+        background: linear-gradient(45deg, #008cff, #33aaff);
+        /* Adjust gradient for dynamic visual feedback */
+    }
+
+    .btn-info:active {
+        transform: translateY(1px);
+        /* Button presses down on click */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        /* Lower shadow to simulate pressing */
+    }
+
+    .download-buttons {
+        padding: 20px;
+    }
+</style>
+<div class="container">
+    <div class="cards-column">
+        <div class="cards1">
+            {% if journey.type == 'running' %}
+            <div class="card1">
+                <div class="card1-content">
+                    <div class="number">Running</div>
+                    <div class="card1-name">Type</div>
+                </div>
+                <div class="icon-box">
+                    <i class='bx bx-run'></i>
+                </div>
+            </div>
+            {% elif journey.type == 'cycling' %}
+            <div class="card1">
+                <div class="card1-content">
+                    <div class="number">Cycling</div>
+                    <div class="card1-name">Type</div>
+                </div>
+                <div class="icon-box">
+                    <i class='bx bx-run'></i>
+                </div>
+            </div>
+            {% endif %}
+
+
+            <div class="card1">
+                <div class="card1-content">
+                    <div class="number">{{ (journey.calculate_distance()) | round(2) }}</div>
+                    <div class="card1-name">Km</div>
+                </div>
+                <div class="icon-box">
+                    <i class='bx bx-line-chart'></i>
+                </div>
+            </div>
+            <div class="card1">
+                <div class="card1-content">
+                    <div class="number">{{ (journey.calculate_average_speed() ) | round(2) }}</div>
+                    <div class="card1-name">Km/h</div>
+                </div>
+                <div class="icon-box">
+                    <i class='bx bxs-bolt'></i>
+                </div>
+            </div>
+
+            <div class="card1">
+                <div class="card1-content">
+                    <div class="number">{{ (journey.calculate_duration() * 60) | round(2) }}</div>
+                    <div class="card1-name">Minutes</div>
+                </div>
+                <div class="icon-box">
+                    <i class='bx bx-timer'></i>
+                </div>
+            </div>
+
+            <div class="card1">
+                <div class="card1-content">
+                    <div class="number">{{ journey.calculate_calories_burned()| round(2) }} kcal</div>
+                    <div class="card1-name">Calories Burned</div>
+                </div>
+                <div class="icon-box">
+                    <i class='bx bxs-hot'></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="map-column">
+        <div class="map-card">
+            <div id="map" style="height: 100%;"></div>
+
+            <div class="download-buttons">
+                <a href="{{ url_for('download_journey', journey_id=journey.id, format='json') }}"
+                    class="btn btn-info btn-sm" style="text-decoration: none;">Download
+                    JSON <i class='bx bx-download'></i></a>
+                <a href="{{ url_for('download_journey', journey_id=journey.id, format='csv') }}"
+                    class="btn btn-info btn-sm" style="text-decoration: none;">Download
+                    CSV <i class='bx bx-download'></i></a>
+            </div>
+
+        </div>
+    </div>
 </div>
 
-<div id="map" style="height: 400px;"></div>
 
-<div id="map"></div>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 <!-- Include Leaflet Routing Machine -->
@@ -39,40 +258,42 @@
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        fetch('/api/journeys')
-            .then(response => response.json())  // Make sure to handle the response as JSON
-            .then(journeys => {
-                journeys.forEach(journey => {
-                    if (journey.data && journey.data.coordinates.length > 0) {
-                        const waypoints = journey.data.coordinates.map(coord => L.latLng(coord.lat, coord.lon));
-                        L.Routing.control({
-                            waypoints: waypoints,
-                            routeWhileDragging: false,
-                            showAlternatives: false,
-                            router: L.Routing.mapbox('sk.eyJ1IjoidGVhbXByb2plY3QiLCJhIjoiY2x2dTA2dWo1MTVjYTJqcnJ2YzF5ZmJwdyJ9.qE-gbM3WxoYX7glO5vq0XQ'), // Replace '<your Mapbox access token>' with your actual token
-                            lineOptions: {
-                                styles: [{ color: getRandomColor(), weight: 4 }]
-                            },
-                            addWaypoints: false,
-                            createMarker: function (i, waypoint, n) {
-                                const marker = L.marker(waypoint.latLng).bindPopup(
-                                    `<strong>Journey ID:</strong> ${journey.id}<br>
-                                 <strong>Journey Name:</strong> ${journey.name}<br>   
-                                 <strong>Type:</strong> ${journey.type}<br>
-                                 <strong>Duration:</strong> ${parseFloat(journey.duration).toFixed(2)} hours<br>
-                                <strong>Distance:</strong> ${parseFloat(journey.distance).toFixed(2)} km<br>
-                                <strong>Calories Burned:</strong> ${parseFloat(journey.calories).toFixed(2)} kcal<br>
-                                <strong>Average Speed:</strong> ${parseFloat(journey.speed).toFixed(2)} km/h`
-                                );
-                                return marker;
-                            },
-                            itinerary: false,
-
-                            collapsible: true
-                        }).addTo(map);
-
-                    }
-                });
+        const journeyId = "{{ journey.id }}";
+        fetch(`/api/journeys/${journeyId}`) // Use template literals to inject the journey ID
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(journey => { // Processing a single journey object
+                if (journey.data && journey.data.coordinates && journey.data.coordinates.length > 0) {
+                    const waypoints = journey.data.coordinates.map(coord => L.latLng(coord.lat, coord.lon));
+                    L.Routing.control({
+                        waypoints: waypoints,
+                        routeWhileDragging: false,
+                        showAlternatives: false,
+                        router: L.Routing.mapbox('sk.eyJ1IjoidGVhbXByb2plY3QiLCJhIjoiY2x2dTA2dWo1MTVjYTJqcnJ2YzF5ZmJwdyJ9.qE-gbM3WxoYX7glO5vq0XQ'), // Use your actual Mapbox access token
+                        lineOptions: {
+                            styles: [{ color: getRandomColor(), weight: 4 }]
+                        },
+                        addWaypoints: false,
+                        createMarker: function (i, waypoint) {
+                            const marker = L.marker(waypoint.latLng).bindPopup(
+                                `<strong>Journey ID:</strong> ${journey.id}<br>
+                             <strong>Journey Name:</strong> ${journey.name}<br>
+                             <strong>Type:</strong> ${journey.type}<br>
+                             <strong>Duration:</strong> ${parseFloat(journey.duration).toFixed(2)} hours<br>
+                             <strong>Distance:</strong> ${parseFloat(journey.distance).toFixed(2)} km<br>
+                             <strong>Calories Burned:</strong> ${parseFloat(journey.calories).toFixed(2)} kcal<br>
+                             <strong>Average Speed:</strong> ${parseFloat(journey.speed).toFixed(2)} km/h`
+                            );
+                            return marker;
+                        },
+                        itinerary: false,
+                        collapsible: true
+                    }).addTo(map);
+                }
             })
             .catch(error => console.error('Error fetching or processing journeys:', error));
 
