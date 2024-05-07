@@ -7,9 +7,9 @@
 
 {% block navbar %}
 <nav id="navbar">
-    <a href="{{ url_for('list_journeys') }}" class="nav-button">Journey List</a>
-    <a href="{{ url_for('upload_gps') }}" class="nav-button">Add Journey</a>
-    <a href="{{ url_for('friends') }}" class="nav-button">Friends</a>
+    <a href="{{ url_for('list_journeys') }}" class="icon-button"><i class='bx bx-list-ul'></i></a>
+    <a href="{{ url_for('upload_gps') }}" class="icon-button"><i class='bx bx-message-square-add'></i></a>
+    <a href="{{ url_for('friends') }}" class="icon-button"><i class='bx bxs-group'></i></a>
     <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
 
 </nav>
