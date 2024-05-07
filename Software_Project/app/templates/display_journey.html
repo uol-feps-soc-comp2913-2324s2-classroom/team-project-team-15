@@ -7,9 +7,9 @@
 
 {% block navbar %}
 <nav id="navbar">
-    <a href="{{ url_for('list_journeys') }}" class="icon-button"><i class='bx bx-list-ul'></i></a>
-    <a href="{{ url_for('upload_gps') }}" class="icon-button"><i class='bx bx-message-square-add'></i></a>
-    <a href="{{ url_for('friends') }}" class="icon-button"><i class='bx bxs-group'></i></a>
+    <a href="{{ url_for('list_journeys') }}" class="nav-button">Journey List</a>
+    <a href="{{ url_for('upload_gps') }}" class="nav-button">Add Journey</a>
+    <a href="{{ url_for('friends') }}" class="nav-button">Friends</a>
     <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
 
 </nav>
@@ -17,15 +17,72 @@
 
 {% block body %}
 <style>
+
+    #totalCalories{
+        width: 300px;
+        height: 70px;
+        border:  4px solid #ff6600;
+        font-weight: 800;
+        color: black;
+        border-radius: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .chartsOn{
+        margin: 3%;
+    }
+    #totalDistance{
+        width: 300px;
+        height: 70px;
+        border:  4px solid #ff6600;
+        font-weight: 800;
+        color: black;
+        border-radius: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #distanceByType{
+        width: 300px;
+        height: 70px;
+        border:  4px solid #ff6600;
+        font-weight: 800;
+        color: black;
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .mapOutside{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 3%;
+    }
+    .secondOutside{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        margin: 2% 7% 2% 7%;
+        border: 3px solid #a5a5a5;
+        border-radius: 10px;
+    }
     #map {
         height: 500px;
         /* Ensure the map has a specific height */
-        width: 100%;
+        width: 50%;
+        border: 5px solid #ff6600;
+        
         /* Full width */
     }
 
     #distanceTimeChart {
-        width: 600px;
+        width: 400px;
         /* Set the width of the canvas */
         height: 450px;
         /* Set the height of the canvas */
@@ -41,7 +98,7 @@
 
 
     #activityTypeChart {
-        width: 300px;
+        width: 400px;
         /* Set the width of the canvas */
         height: 225px;
         /* Set the height of the canvas */
@@ -56,7 +113,30 @@
     }
 </style>
 
-<div id="map"></div>
+<div class="twoBtns1">
+    <button class="oneBtn" id="oneBtn1" onclick="thewindowOpen1()">Routes</button>
+    <button class="oneBtn" id="oneBtn2" onclick="thewindowOpen2()">Stats</button>
+</div>
+<div class="mapOutside" style="display: none;" id="thewindow1">
+    <div id="map"></div>
+</div>
+
+<div class="secondOutside" style="display: none;" id="thewindow2">
+    <div id="stats">
+        <p id="totalCalories">Total Calories: 0 kcal</p>
+        <p id="totalDistance">Total Distance: 0 km</p>
+        <div id="distanceByType"></div>
+    </div>
+    <div class="chartsOn">
+        <canvas id="distanceTimeChart"></canvas>
+        <canvas id="activityTypeChart"></canvas>
+    </div>
+</div>
+
+
+
+
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 <!-- Include Leaflet Routing Machine -->
@@ -118,12 +198,6 @@
 
     });
 </script>
-<div id="stats">
-    <h3>Stats</h3>
-    <p id="totalCalories">Total Calories: 0 kcal</p>
-    <p id="totalDistance">Total Distance: 0 km</p>
-    <div id="distanceByType"></div>
-</div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         fetch('/api/journeys_stats')
@@ -144,10 +218,7 @@
     });
 
 </script>
-<div>
-    <canvas id="distanceTimeChart"></canvas>
-    <canvas id="activityTypeChart"></canvas>
-</div>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -209,6 +280,36 @@
             })
             .catch(error => console.error('Error fetching or processing journeys:', error));
     });
+</script>
+<script>
+    window.onload = function () {
+        document.getElementById("oneBtn1").click();
+    };
+    function thewindowOpen1() {
+        const window1 = document.getElementById("thewindow1");
+        const window2 = document.getElementById("thewindow2");
+
+        window1.style.display = "flex";
+        window2.style.display = "none";
+    }
+    function thewindowOpen2() {
+        const window1 = document.getElementById("thewindow1");
+        const window2 = document.getElementById("thewindow2");
+        window2.style.display = "flex";
+        window1.style.display = "none";
+
+    }
+
+</script>
+
+<script>
+    const btnElList = document.querySelectorAll('.oneBtn');
+    btnElList.forEach(btnEl => {
+        btnEl.addEventListener('click', () => {
+            document.querySelector('.special2')?.classList.remove('special2');
+            btnEl.classList.add('special2');
+        })
+    })
 </script>
 
 
