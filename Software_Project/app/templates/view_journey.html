@@ -22,21 +22,27 @@
         justify-content: space-around;
         align-items: flex-start;
         padding: 0px;
-        gap: 45px;
+        /* gap: 45px; */
         /* Spacing between columns */
     }
 
     .cards-column {
         flex: 1 1 300px;
         /* Flexibility with basis of 300px */
-        max-width: 300px;
+        max-width: 600px;
+        height: 700px;
+        display: flex;
+        justify-content: center;
+        align-self:center;
+        margin-top: 3%;
         /* Maximum width of the cards column */
     }
 
     .map-column {
-        flex: 2 1 600px;
+        flex: 2 1 500px;
         /* Flexibility with basis of 600px */
-        max-width: 100%;
+        width: 50%;
+        height: 100%;
         /* Allows it to grow */
         display: flex;
         /* Enables flexbox layout */
@@ -45,34 +51,29 @@
         align-items: center;
         /* Centers content vertically */
         padding: 0px;
+        margin-top: 4.5%;
     }
 
     .cards1 {
         display: flex;
         flex-direction: column;
-        /* Aligns children vertically */
         align-items: left;
-        /* Centers cards horizontally */
-        gap: 20px;
-        /* Spacing between each card */
+        width: 282px !important;
+        /* gap: 20px; */
+        padding: 0 !important;
         flex-wrap: wrap;
     }
 
-    /* Style for each card */
     .card1 {
-        /* Vertical center alignment within each card */
+     
         background-color: #f9f9f9;
-        /* Light grey background for cards */
         border: 1px solid #ff6600;
-        /* Subtle border */
         border-radius: 8px;
-        /* Rounded corners */
         padding: 15px;
-        /* Padding inside each card */
-        width: 300px;
-        /* Fixed width for consistency */
+        width: 250px;
+        margin:2%;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        /* Soft shadow for depth */
+     
     }
 
     .cards1 .card1 {
@@ -86,6 +87,10 @@
         /* Full width of its container */
         height: 100%;
         /* Fixed height for the map */
+        position: absolute;
+        margin: 2%;
+        border: 5px solid #ff6600;
+        
 
     }
 
@@ -94,17 +99,17 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        border: 1px solid #cccccc;
+        /* border: 5px solid #ff6600; */
         /* Card-like border */
-        background-color: #ff6600;
+        /* background-color: #ff6600; */
         /* Light grey background for cards */
         border-radius: 8px;
         /* Rounded corners */
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
         /* Soft shadow for depth */
-        padding: 10px;
+        /* padding: 10px; */
         /* Padding around the map */
-        margin: 20px;
+        /* margin: 20px; */
         /* Margin around the card to separate from other elements */
         height: 500px;
         /* Fixed height for the map */
@@ -113,6 +118,7 @@
         flex-wrap: wrap;
         flex-direction: row;
         align-content: space-around;
+        position: relative;
     }
 
     .btn-info {
@@ -165,6 +171,22 @@
     }
 </style>
 <div class="container">
+
+    <div class="map-column">
+        <div class="map-card">
+            <div id="map" style="height: 100%;"></div>
+
+            <div class="download-buttons">
+                <a href="{{ url_for('download_journey', journey_id=journey.id, format='json') }}"
+                    class="btn btn-info btn-sm" style="text-decoration: none;">Download
+                    JSON <i class='bx bx-download'></i></a>
+                <a href="{{ url_for('download_journey', journey_id=journey.id, format='csv') }}"
+                    class="btn btn-info btn-sm" style="text-decoration: none;">Download
+                    CSV <i class='bx bx-download'></i></a>
+            </div>
+
+        </div>
+    </div>
     <div class="cards-column">
         <div class="cards1">
             {% if journey.type == 'running' %}
@@ -228,21 +250,6 @@
                     <i class='bx bxs-hot'></i>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="map-column">
-        <div class="map-card">
-            <div id="map" style="height: 100%;"></div>
-
-            <div class="download-buttons">
-                <a href="{{ url_for('download_journey', journey_id=journey.id, format='json') }}"
-                    class="btn btn-info btn-sm" style="text-decoration: none;">Download
-                    JSON <i class='bx bx-download'></i></a>
-                <a href="{{ url_for('download_journey', journey_id=journey.id, format='csv') }}"
-                    class="btn btn-info btn-sm" style="text-decoration: none;">Download
-                    CSV <i class='bx bx-download'></i></a>
-            </div>
-
         </div>
     </div>
 </div>
