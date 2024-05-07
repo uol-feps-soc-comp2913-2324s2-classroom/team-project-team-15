@@ -45,6 +45,7 @@
         height: 100%;
         /* Allows it to grow */
         display: flex;
+        flex-direction: column;
         /* Enables flexbox layout */
         justify-content: center;
         /* Centers content horizontally */
@@ -175,16 +176,14 @@
     <div class="map-column">
         <div class="map-card">
             <div id="map" style="height: 100%;"></div>
-
-            <div class="download-buttons">
-                <a href="{{ url_for('download_journey', journey_id=journey.id, format='json') }}"
-                    class="btn btn-info btn-sm" style="text-decoration: none;">Download
-                    JSON <i class='bx bx-download'></i></a>
-                <a href="{{ url_for('download_journey', journey_id=journey.id, format='csv') }}"
-                    class="btn btn-info btn-sm" style="text-decoration: none;">Download
-                    CSV <i class='bx bx-download'></i></a>
-            </div>
-
+        </div>
+        <div class="download-buttons">
+            <a href="{{ url_for('download_journey', journey_id=journey.id, format='json') }}"
+                class="btn btn-info btn-sm" style="text-decoration: none;">Download
+                JSON <i class='bx bx-download'></i></a>
+            <a href="{{ url_for('download_journey', journey_id=journey.id, format='csv') }}"
+                class="btn btn-info btn-sm" style="text-decoration: none;">Download
+                CSV <i class='bx bx-download'></i></a>
         </div>
     </div>
     <div class="cards-column">
