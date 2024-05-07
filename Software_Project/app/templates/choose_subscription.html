@@ -12,54 +12,98 @@
 {% endblock %}
 
 {% block body %}
-<div class="current-subscription-info">
-    {% if current_subscription %}
-    <p>Current Plan: {{ current_subscription.plan_name }}</p>
-    <p>Start Date: {{ current_subscription.start_date }}</p>
-    <p>Expiration Date: {{ current_subscription.expiration_date }}</p>
-    <p>Days Left: {{ current_subscription.days_left }}</p>
-    <p><strong>Auto-Renewal:</strong> {{ 'On' if subscription_details.is_auto_renewal_on else 'Off' }}</p>
-    <form action="{{ url_for('enable_auto_renewal') }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn btn-primary">Enable Auto-Renewal</button>
-    </form>
-    {% else %}
-    <p>No active subscription.</p>
-    {% endif %}
-</div>
 
-{% if current_subscription %}
-<form action="{{ url_for('cancel_subscription') }}" method="POST">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit">Cancel Subscription at Period End</button>
-</form>
-{% endif %}
+<div class="subMainPage">
 
-<div class="subscription-plans">
-    {% for plan in plans %}
-    <div class="plan">
-        <h2>{{ plan.name }}</h2>
-        <p class="price">{{ plan.amount }} {{ plan.currency }}</p>
-        {% if current_subscription and plan.id == current_subscription.price_id %}
-        <button disabled>Current Plan</button>
-        {% else %}
-        {% if current_subscription %}
-        <form action="{{ url_for('change_subscription', new_plan_stripe_id=plan.id) }}" method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit">Change to {{ plan.plan_name }}</button>
-        </form>
-        {% else %}
-        <form action="{{ url_for('create_checkout_session', plan_id=plan.id) }}" method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="stripe_price_id" value="{{ plan.id }}">
-
-            <button type="submit">Choose {{ plan.plan_name }}</button>
-            {% endif %}
-        </form>
-        {% endif %}
+    <div class="twoBtns">
+        <button class="oneBtn" id="oneBtn1" onclick="thewindowOpen1()">Choose Subscription</button>
+        <button class="oneBtn" id="oneBtn2" onclick="thewindowOpen2()">Your Plan</button>
     </div>
-    {% endfor %}
+
+
+    <div class="subscription-plans">
+        <div class="myplan" style="display: none;" id="thewindow2">
+            <div class="main-div2">
+                <div class="content">
+                    <ul class="user-details">
+                        {% if current_subscription %}
+                        <li><span>Current Plan:</span> {{ current_subscription.plan_name }}</li>
+                        <li><span>Start Date:</span> {{ current_subscription.start_date }}</li>
+                        <li><span>Expiration Date:</span>  {{ current_subscription.expiration_date }}</li>
+                        <li><span>Days Left:</span>  {{ current_subscription.days_left }}</li>
+                        <li><span><strong>Auto-Renewal:</strong> </span> {{ 'On' if subscription_details.is_auto_renewal_on else 'Off' }}</li>
+                        <form action="{{ url_for('enable_auto_renewal') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="renewalBtn">Enable Auto-Renewal</button>
+                        </form>
+                        <form action="{{ url_for('cancel_subscription') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="renewalBtn">Cancel Subscription at Period End</button>
+                        </form>
+                        {% else %}
+                        <p>No active subscription.</p>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="conf1" style="display: none;" id="thewindow1">
+            {% for plan in plans %}
+            <div class="plan" id="monthly">
+                <h2>{{ plan.name }}</h2>
+                <p class="price">{{ plan.amount }} {{ plan.currency }}</p>
+                {% if current_subscription and plan.id == current_subscription.price_id %}
+                <button disabled>Current Plan</button>
+                {% else %}
+                {% if current_subscription %}
+                <form action="{{ url_for('change_subscription', new_plan_stripe_id=plan.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit">Change to {{ plan.plan_name }}</button>
+                </form>
+                {% else %}
+                <form action="{{ url_for('create_checkout_session', plan_id=plan.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="stripe_price_id" value="{{ plan.id }}">
+        
+                    <button type="submit">Choose {{ plan.plan_name }}</button>
+                    {% endif %}
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
+<script>
+    window.onload = function () {
+        document.getElementById("oneBtn1").click();
+    };
+    function thewindowOpen1() {
+        const window1 = document.getElementById("thewindow1");
+        const window2 = document.getElementById("thewindow2");
+
+        window1.style.display = "flex";
+        window2.style.display = "none";
+    }
+    function thewindowOpen2() {
+        const window1 = document.getElementById("thewindow1");
+        const window2 = document.getElementById("thewindow2");
+        window2.style.display = "block";
+        window1.style.display = "none";
+
+    }
+
+</script>
+
+<script>
+    const btnElList = document.querySelectorAll('.oneBtn');
+    btnElList.forEach(btnEl => {
+        btnEl.addEventListener('click', () => {
+            document.querySelector('.special1')?.classList.remove('special1');
+            btnEl.classList.add('special1');
+        })
+    })
+</script>
 
 {% endblock %}

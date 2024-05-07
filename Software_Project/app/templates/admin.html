@@ -117,7 +117,7 @@
             <h1 id="title">MyRoute</h1>
             <div class="innerNav">
                 <a class="navName" id="myButton" onclick="UserSide1()">Insights</a>
-                <a class="navName" onclick="UserSide()">Users</a>
+                <a class="navName" id="myButton2" onclick="UserSide()">Users</a>
             </div>
             <nav id="navbar">
                 <a href="{{ url_for('logout') }}" class="nav-button">Logout</a>
@@ -134,17 +134,23 @@
                         <tr>
                             <th>ID</th>
                             <th>Username</th>
-                            <th>Functions</th>
+                            <th>Email</th>
+                            <th>Subscription</th>
+                            <th>Payment Expiry</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for user in users %}
+                        {% for user, expiry_date in users_with_expiry_dates %}
                         <tr class="horizontal-border">
                             <td>{{ user.id }}</td>
                             <td>{{ user.username }}</td>
-                            <td class="action-links">
-                                <button class="btn btn-info btn-sm" onclick="editRow2()" tabindex="{{ 6 + loop.index }}">Details</button>
-                            </td>
+                            <td>{{ user.email}}</td>
+                            {% if user.subscription_plan %}
+                            <td>{{ user.subscription_plan.plan_name }}</td>
+                            {% else %}
+                            <td>None</td>
+                            {% endif %}
+                            <td>{{ expiry_date }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
