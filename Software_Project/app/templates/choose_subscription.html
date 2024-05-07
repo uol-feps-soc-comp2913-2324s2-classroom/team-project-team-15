@@ -2,10 +2,10 @@
 
 {% block navbar %}
 <nav id="navbar">
-    <a href="{{ url_for('list_journeys') }}" class="nav-button">Journey List</a>
-    <a href="{{ url_for('upload_gps') }}" class="nav-button">Add Journey</a>
-    <a href="{{ url_for('friends') }}" class="nav-button">Friends</a>
-    <a href="{{ url_for('display_journeys') }}" class="nav-button">Home</a>
+    <a href="{{ url_for('list_journeys') }}" class="icon-button"><i class='bx bx-list-ul'></i></a>
+    <a href="{{ url_for('upload_gps') }}" class="icon-button"><i class='bx bx-message-square-add'></i></a>
+    <a href="{{ url_for('friends') }}" class="icon-button"><i class='bx bxs-group'></i></a>
+    <a href="{{ url_for('display_journeys') }}" class="icon-button"><i class='bx bx-trip'></i></a>
     <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
 
 </nav>
@@ -29,9 +29,10 @@
                         {% if current_subscription %}
                         <li><span>Current Plan:</span> {{ current_subscription.plan_name }}</li>
                         <li><span>Start Date:</span> {{ current_subscription.start_date }}</li>
-                        <li><span>Expiration Date:</span>  {{ current_subscription.expiration_date }}</li>
-                        <li><span>Days Left:</span>  {{ current_subscription.days_left }}</li>
-                        <li><span><strong>Auto-Renewal:</strong> </span> {{ 'On' if subscription_details.is_auto_renewal_on else 'Off' }}</li>
+                        <li><span>Expiration Date:</span> {{ current_subscription.expiration_date }}</li>
+                        <li><span>Days Left:</span> {{ current_subscription.days_left }}</li>
+                        <li><span><strong>Auto-Renewal:</strong> </span> {{ 'On' if
+                            subscription_details.is_auto_renewal_on else 'Off' }}</li>
                         <form action="{{ url_for('enable_auto_renewal') }}" method="POST">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="renewalBtn">Enable Auto-Renewal</button>
@@ -64,7 +65,7 @@
                 <form action="{{ url_for('create_checkout_session', plan_id=plan.id) }}" method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="stripe_price_id" value="{{ plan.id }}">
-        
+
                     <button type="submit">Choose {{ plan.plan_name }}</button>
                     {% endif %}
                 </form>

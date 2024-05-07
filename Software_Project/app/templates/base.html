@@ -86,9 +86,9 @@
                     <li><span>Date of Birth:</span> {{ current_user.dob }}</li>
                     <li><span>Email:</span> {{ current_user.email }}</li>
                     <li><span>Phone Number:</span> {{ current_user.phone_number }}</li>
-                    <li><span>Subscription Plan:</span> {{ subscription_plan_name }}<button><a
-                                href="{{ url_for('choose_subscription') }}"
-                                class="btn btn-primary ml-3">Change</a></button>
+                    <li><span>Subscription Plan:</span> {{ subscription_plan_name }} <a
+                            href="{{ url_for('choose_subscription') }}" class="btn btn-info btn-sm"
+                            style="text-decoration: none;">Change</a>
                     </li>
                 </ul>
             </div>

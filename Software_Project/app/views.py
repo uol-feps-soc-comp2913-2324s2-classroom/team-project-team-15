@@ -313,7 +313,7 @@ def payment_success():
         flash(f'There was an error confirming your payment: {e}', 'error')
 
 
-    return redirect(url_for('index'))
+    return redirect(url_for('display_journeys'))
 
 
 @app.route('/payment_cancel',methods=['GET'])

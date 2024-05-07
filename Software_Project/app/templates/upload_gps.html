@@ -5,9 +5,9 @@
 {% endblock %}
 {% block navbar %}
 <nav id="navbar">
-    <a href="{{ url_for('list_journeys') }}" class="nav-button">Journey List</a>
-    <a href="{{ url_for('friends') }}" class="nav-button">Friends</a>
-    <a href="{{ url_for('display_journeys') }}" class="nav-button">Home</a>
+    <a href="{{ url_for('list_journeys') }}" class="icon-button"><i class='bx bx-list-ul'></i></a>
+    <a href="{{ url_for('friends') }}" class="icon-button"><i class='bx bxs-group'></i></a>
+    <a href="{{ url_for('display_journeys') }}" class="icon-button"><i class='bx bx-trip'></i></a>
     <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
 
 </nav>
