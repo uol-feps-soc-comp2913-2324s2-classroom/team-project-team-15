@@ -216,8 +216,13 @@
 </style>
 
 <body class="friendsBody">
+    <div class="twoBtns1">
+        <button class="oneBtn" id="oneBtn1" onclick="thewindowOpen1()">Manage Friends</button>
+        <button class="oneBtn" id="oneBtn2" onclick="thewindowOpen2()">Shared Map</button>
+    </div>
     <div class="container">
-        <div class="mainWhiteParent">
+
+        <div class="mainWhiteParent" style="display: none;" id="thewindow1">
             <div class="mainWhite">
                 <div class="friendsNav">
                     <button class="fNavBtn" id="btn1" onclick="windowOpen1()"><i class='bx bx-search'
@@ -341,7 +346,7 @@
 
             </div>
         </div>
-        <div class="map-card">
+        <div class="map-card" style="display: none;" id="thewindow2">
             <div id="map"></div>
         </div>
         <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
@@ -595,7 +600,7 @@
 
 <script>
     window.onload = function () {
-        document.getElementById("btn1").click();
+        document.getElementById("oneBtn1").click();
     };
     function windowOpen1() {
         const window1 = document.getElementById("window1");
@@ -621,6 +626,32 @@
         window1.style.display = "none";
         window2.style.display = "none";
     }
+    function thewindowOpen1() {
+        
+        const window1 = document.getElementById("thewindow1");
+        const window2 = document.getElementById("thewindow2");
+
+        window1.style.display = "flex";
+        window2.style.display = "none";
+        document.getElementById("btn1").click();
+    }
+    function thewindowOpen2() {
+        const window1 = document.getElementById("thewindow1");
+        const window2 = document.getElementById("thewindow2");
+        window2.style.display = "block";
+        window1.style.display = "none";
+
+    }
+</script>
+
+<script>
+    const btnElList1 = document.querySelectorAll('.oneBtn');
+    btnElList1.forEach(btnEl => {
+        btnEl.addEventListener('click', () => {
+            document.querySelector('.special2')?.classList.remove('special2');
+            btnEl.classList.add('special2');
+        })
+    })
 </script>
 
 
