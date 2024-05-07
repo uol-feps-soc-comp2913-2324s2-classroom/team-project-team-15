@@ -13,6 +13,7 @@ from werkzeug.security import generate_password_hash
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from collections import defaultdict
+from sqlalchemy.orm import joinedload
 import stripe
 import logging
 from datetime import date, datetime, timedelta
@@ -109,6 +110,10 @@ def login():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     active_subscriptions = User.query.filter(User.subscription_start_date.isnot(None)).all()
+    Users =  User.query.all()
+    users_with_expiry_dates = db.session.query(User, Payment.card_expiry_date).\
+    outerjoin(Payment).all()
+
 
     weekly_revenue = {}
     current_date = datetime.now().date()
@@ -148,7 +153,7 @@ def admin():
     print(sorted_weekly_revenue)
     sorted_weekly_revenue = sorted(weekly_revenue.items())
 
-    return render_template('admin.html', revenue_data=sorted_weekly_revenue, subscription_counts=subscription_counts)
+    return render_template('admin.html', revenue_data=sorted_weekly_revenue, subscription_counts=subscription_counts, Users=Users, users_with_expiry_dates=users_with_expiry_dates)
 
 @app.route('/logout')
 @login_required
@@ -524,7 +529,6 @@ def inject_subscription_details():
         'stripe_customer_id': None,
         'stripe_price_id': None
     }
-
     if current_user.is_authenticated:
         user = User.query.get(current_user.id)
         if user.subscription_plan:
@@ -535,6 +539,8 @@ def inject_subscription_details():
             details['subscription_plan_name'] = 'No Subscription'
     
     return details
+
+
 
 @app.route('/search-users', methods=['GET'])
 @login_required
