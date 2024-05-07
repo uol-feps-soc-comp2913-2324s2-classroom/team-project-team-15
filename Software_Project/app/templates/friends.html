@@ -2,20 +2,14 @@
 
 {% block head %}
 
-<style>
-    #map {
-        height: 100%;
-        width: 100%;
-    }
-</style>
 
 {% endblock %}
 
 {% block navbar %}
 <nav id="navbar">
-    <a href="{{ url_for('index') }}" class="nav-button">Journey List</a>
-    <a href="{{ url_for('upload_gps') }}" class="nav-button">Add Journey</a>
-    <a href="{{ url_for('display_journeys') }}" class="nav-button">Home</a>
+    <a href="{{ url_for('list_journeys') }}" class="icon-button"><i class='bx bx-list-ul'></i></a>
+    <a href="{{ url_for('upload_gps') }}" class="icon-button"><i class='bx bx-message-square-add'></i></a>
+    <a href="{{ url_for('display_journeys') }}" class="icon-button"><i class='bx bx-trip'></i></a>
     <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
 
 </nav>
@@ -24,139 +18,391 @@
 
 {% block body %}
 
+<style>
+    #map {
+        width: 100%;
+        /* Full width of its container */
+        height: 100%;
+        /* Fixed height for the map */
+
+    }
+
+    /* Card styling for the map */
+    .map-card {
+        flex-grow: 1;
+        display: flex;
+        flex: 1 1 60%;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #cccccc;
+        /* Card-like border */
+        background-color: #ff6600;
+        /* Light grey background for cards */
+        border-radius: 8px;
+        /* Rounded corners */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        /* Soft shadow for depth */
+        padding: 10px;
+        /* Padding around the map */
+        margin: 20px;
+        /* Margin around the card to separate from other elements */
+        height: 500px;
+        /* Fixed height for the map */
+        width: 60%;
+        /* Adjust width as necessary */
+        flex-wrap: wrap;
+        flex-direction: row;
+        align-content: space-around;
+    }
+
+    .searchResults1 button {
+        right: 5px;
+        background-color: white;
+        border-radius: 15px;
+        border: none;
+        padding: 1%;
+        font-weight: 700;
+    }
+
+    .btn-info {
+        color: #fff;
+        /* White text color for better contrast on darker backgrounds */
+        background: linear-gradient(45deg, #ff6600, #ff1e00);
+        /* Gradient background for visual interest */
+        border: none;
+        /* Remove border for a smoother look */
+        padding: 5px 7.5px;
+        /* Adequate padding for a better click area */
+        border-radius: 6px;
+        /* Rounded corners for a modern look */
+        cursor: pointer;
+        /* Cursor indicates a clickable element */
+        font-size: 13px;
+        /* Slightly larger font for readability */
+        font-weight: bold;
+        /* Bold text for emphasis */
+        letter-spacing: 0.05em;
+        /* Spacing out letters for better readability */
+        text-transform: uppercase;
+        /* Uppercase text for a more stylized appearance */
+        transition: transform 0.3s, box-shadow 0.3s;
+        /* Smooth transitions for interactive feedback */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        /* Soft shadow for 3D effect */
+        outline: none;
+        /* Remove outline to clean up focus state */
+    }
+
+    .btn-info:hover,
+    .btn-info:focus {
+        transform: translateY(-3px);
+        /* Slight lift effect on hover */
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        /* Enhanced shadow on hover for a 'popping' effect */
+        background: linear-gradient(45deg, #008cff, #33aaff);
+        /* Adjust gradient for dynamic visual feedback */
+    }
+
+    .btn-info:active {
+        transform: translateY(1px);
+        /* Button presses down on click */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        /* Lower shadow to simulate pressing */
+    }
+
+    .btn-info2 {
+        color: #fff;
+        /* White text color for better contrast on darker backgrounds */
+        background: linear-gradient(45deg, #ff1e00, #ff8533);
+        /* Gradient background for visual interest */
+        border: none;
+        /* Remove border for a smoother look */
+        padding: 5px 7.5px;
+        /* Adequate padding for a better click area */
+        border-radius: 6px;
+        /* Rounded corners for a modern look */
+        cursor: pointer;
+        /* Cursor indicates a clickable element */
+        font-size: 13px;
+        /* Slightly larger font for readability */
+        font-weight: bold;
+        /* Bold text for emphasis */
+        letter-spacing: 0.05em;
+        /* Spacing out letters for better readability */
+        text-transform: uppercase;
+        /* Uppercase text for a more stylized appearance */
+        transition: transform 0.3s, box-shadow 0.3s;
+        /* Smooth transitions for interactive feedback */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        /* Soft shadow for 3D effect */
+        outline: none;
+        /* Remove outline to clean up focus state */
+    }
+
+    .btn-info2:hover,
+    .btn-info2:focus {
+        transform: translateY(-3px);
+        /* Slight lift effect on hover */
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        /* Enhanced shadow on hover for a 'popping' effect */
+        background: linear-gradient(45deg, #e60400, #f20b0b);
+        /* Adjust gradient for dynamic visual feedback */
+    }
+
+    .btn-info2:active {
+        transform: translateY(1px);
+        /* Button presses down on click */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        /* Lower shadow to simulate pressing */
+    }
+
+    .mainWhiteParent {
+        flex-grow: 1;
+        flex: 1 1 40%;
+        /* Takes up 1 part of the available space */
+        padding: 10px;
+        /* Limits maximum width to 40% of the container */
+    }
+
+    .thisTable td {
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+
+    thead {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+
+    }
+
+    .thisTable th {
+        text-align: center;
+        padding: 5px;
+        color: white;
+        background: #ff6600;
+        font-weight: normal;
+    }
+
+    .table-container4 {
+        background: #ff660016;
+        border-radius: 20px;
+        height: 100%;
+        overflow: hidden;
+        overflow-y: scroll;
+    }
+
+    .thisTable {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+
+    .thisTable tr.odd {
+        background-color: #908282;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        /* Prevents the flex items from wrapping */
+        justify-content: space-between;
+        /* Spaces out the children */
+        align-items: flex-start;
+        /* Aligns items to the top of the container */
+    }
+</style>
+
 <body class="friendsBody">
-    <div class="mainWhiteParent">
-        <div class="mainWhite">
-            <div class="friendsNav">
-                <button class="fNavBtn" id="btn1" onclick="windowOpen1()">Search</button>
-                <button class="fNavBtn" onclick="windowOpen2()">My Friends</button>
-                <button class="fNavBtn" onclick="windowOpen3()">Requests</button>
-                <button class="fNavBtn" onclick="windowOpen4()">Shared Map</button>
-
-            </div>
-            <div class="searchFriend" style="display: none;" id="window1">
-                <div class="topSearch">
-                    <form id="searchForm">
-                        <input class="typeText" type="text" name="query" placeholder="Search for usernames...">
-                        <input class="searchBtn" type="submit" value="Search">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    </form>
-                </div>
-
-                <div id="searchResults" class="searchResults">
-                    <ul>
-                        {% for user in users %}
-                        <li>
-                            {{ user.username }}
-                            {% if user.is_friend %}
-                            <button disabled>Already Friends</button>
-                            {% elif user.can_cancel %}
-                            <button class="cancel-request" data-user-id="{{ user.id }}">Cancel Request</button>
-                            {% else %}
-                            <button class="send-request" data-user-id="{{ user.id }}">Request</button>
-                            {% endif %}
-                        </li>
-                        {% endfor %}
-                    </ul>
-
-                </div>
-            </div>
-
-            <!-- Friends list section -->
-            <div class="searchFriend" style="display: none;" id="window2">
-                <!-- <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> -->
-                <div id="searchResults" class="searchResults">
-                    <ul>
-                        {% for friend in friends %}
-                        <li id="friend-{{ friend.id }}">
-                            {{ friend.username }}
-                            <button class="unfriend-button" data-friend-id="{{ friend.id }}">Unfriend</button>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-
-            <div class="searchFriend" style="display: none;" id="window3">
-                <!-- <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> -->
-                <div id="searchResults" class="searchResults1">
-                    <ul>
-                        {% for request in requests %}
-                        <li>
-                            {{ request.requester.username }} wants to be friends.
-                            <button class="respond-request" data-request-id="{{ request.id }}"
-                                data-action="accept">Accept</button>
-                            <!-- <button class="respond-request" data-request-id="{{ request.id }}"
-                                data-action="reject">Reject</button> -->
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-
-
-            <div class="searchFriend" style="display: none;" id="window4">
-                <div id="map"></div>
-                <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const map = L.map('map').setView([51.505, -0.09], 13);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '&copy; OpenStreetMap contributors'
-                        }).addTo(map);
-
-                        fetch('/api/friends/latest-journeys')
-                            .then(response => response.json())
-                            .then(journeys => {
-                                journeys.forEach(journey => {
-                                    if (journey.coordinates && journey.coordinates.length > 0) {
-                                        const waypoints = journey.coordinates.map(coord => L.latLng(coord.lat, coord.lon));
-                                        L.Routing.control({
-                                            waypoints: waypoints,
-                                            routeWhileDragging: false,
-                                            showAlternatives: false,
-                                            addWaypoints: false,
-                                            router: L.Routing.mapbox('sk.eyJ1IjoidGVhbXByb2plY3QiLCJhIjoiY2x2dTA2dWo1MTVjYTJqcnJ2YzF5ZmJwdyJ9.qE-gbM3WxoYX7glO5vq0XQ'),
-                                            lineOptions: {
-                                                styles: [{ color: getRandomColor(), weight: 4 }]
-                                            },
-                                            createMarker: function (i, waypoint) {
-                                                return L.marker(waypoint.latLng).bindPopup(
-                                                    `<strong>Friend:<strong>${journey.username}<br>
-                                 <strong>Type:</strong> ${journey.type}<br>
-                                 <strong>Duration:</strong> ${journey.duration.toFixed(2)} hours<br>
-                                 <strong>Distance:</strong> ${journey.distance.toFixed(2)} km<br>
-                                 <strong>Calories:</strong> ${journey.calories.toFixed(2)} kcal<br>
-                                 <strong>Speed:</strong> ${journey.speed.toFixed(2)} km/h`
-                                                );
-                                            },
-                                            itinerary: false,
-                                            collapsible: true
-                                        }).addTo(map);
-                                    }
-                                });
-                            })
-                            .catch(error => console.error('Error fetching or processing journeys:', error));
-
-                        function getRandomColor() {
-                            const colors = [
-                                "#00429d", "#8c2981", "#fe6100", "#5d2b76", "#4cb5ae",
-                                "#007d34", "#c0369d", "#f13c1e", "#232c16", "#ca0147",
-                                "#00a9cf", "#a79d00", "#6b4423", "#e6194b", "#3cb44b"
-                            ];
-
-                            // Randomly pick a color from the array
-                            return colors[Math.floor(Math.random() * colors.length)];
-                        }
-
-                    });
-                </script>
-            </div>
-
-        </div>
+    <div class="twoBtns1">
+        <button class="oneBtn" id="oneBtn1" onclick="thewindowOpen1()">Manage Friends</button>
+        <button class="oneBtn" id="oneBtn2" onclick="thewindowOpen2()">Shared Map</button>
     </div>
-    <div class="mainWhiteParent">
+    <div class="container">
 
+        <div class="mainWhiteParent" style="display: none;" id="thewindow1">
+            <div class="mainWhite">
+                <div class="friendsNav">
+                    <button class="fNavBtn" id="btn1" onclick="windowOpen1()"><i class='bx bx-search'
+                            style='font-size: 24px;'><br></i>Search</button>
+                    <button class="fNavBtn" onclick="windowOpen2()"><i class='bx bx-user-circle'
+                            style='font-size: 24px;'><br></i>My Friends </button>
+                    <button class="fNavBtn" onclick="windowOpen3()"><i class='bx bxs-inbox'
+                            style='font-size: 24px;'><br></i>Requests</button>
+
+                </div>
+                <div class="searchFriend" style="display: none;" id="window1">
+                    <div class="topSearch">
+                        <form id="searchForm">
+                            <input class="typeText" type="text" name="query" placeholder="Search for usernames...">
+                            <input class="searchBtn" type="submit" value="Search">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        </form>
+                    </div>
+
+                    <div id="searchResults" class="searchResults">
+                        <ul>
+                            {% for user in users %}
+                            <li>
+                                {{ user.username }}
+                                {% if user.is_friend %}
+                                <button>Already Friends</button>
+                                {% elif user.can_cancel %}
+                                <button class="cancel-request " data-user-id="{{ user.id }}">Cancel Request</button>
+                                {% else %}
+                                <button class="send-request " data-user-id="{{ user.id }}">Request</button>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+
+                    </div>
+                </div>
+
+                <!-- Friends list section -->
+                <div class="searchFriend" style="display: none;" id="window2">
+                    <!-- <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> -->
+                    <div id="searchResults1" class="searchResults">
+                        <div class="part1" id="part1">
+                            <div class="container1">
+                                <div class="table-container4">
+                                    <table class="thisTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Friend Username</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for friend in friends %}
+                                            <tr class="horizontal-border">
+                                                <td><strong>{{ friend.username }}</strong></td>
+                                                <td>
+                                                    <button class="unfriend-button btn btn-info btn-sm"
+                                                        data-friend-id="{{ friend.id }}">
+                                                        Unfriend
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% else %}
+                                            <tr class="horizontal-border">
+                                                <td colspan="2">No friends found.</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="searchFriend" style="display: none;" id="window3">
+                    <!-- <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> -->
+                    <div id="searchResults1" class="searchResults1">
+                        <div class="part1" id="part1">
+                            <div class="container1">
+                                <div class="table-container4">
+                                    <table class="thisTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Requester Username</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for request in requests %}
+                                            <tr class="horizontal-border">
+                                                <td><strong>{{
+                                                        request.requester.username }}</strong>
+                                                    wants to be friends.</td>
+                                                <td>
+                                                    <button class="respond-request btn btn-info btn-sm"
+                                                        style="text-decoration: none;"
+                                                        data-request-id="{{ request.id }}"
+                                                        data-action="accept">Accept</button>
+
+                                                    <button class="respond-request btn btn-info2 btn-sm"
+                                                        style="text-decoration: none;"
+                                                        data-request-id="{{ request.id }}"
+                                                        data-action="reject">Reject</button>
+                                                </td>
+                                            </tr>
+                                            {% else %}
+                                            <tr class="horizontal-border">
+                                                <td colspan="2">No friend requests found.</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="map-card" style="display: none;" id="thewindow2">
+            <div id="map"></div>
+        </div>
+        <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const map = L.map('map').setView([51.505, -0.09], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+
+                fetch('/api/friends/latest-journeys')
+                    .then(response => response.json())
+                    .then(journeys => {
+                        journeys.forEach(journey => {
+                            if (journey.coordinates && journey.coordinates.length > 0) {
+                                const waypoints = journey.coordinates.map(coord => L.latLng(coord.lat, coord.lon));
+                                L.Routing.control({
+                                    waypoints: waypoints,
+                                    routeWhileDragging: false,
+                                    showAlternatives: false,
+                                    addWaypoints: false,
+                                    router: L.Routing.mapbox('sk.eyJ1IjoidGVhbXByb2plY3QiLCJhIjoiY2x2dTA2dWo1MTVjYTJqcnJ2YzF5ZmJwdyJ9.qE-gbM3WxoYX7glO5vq0XQ'),
+                                    lineOptions: {
+                                        styles: [{ color: getRandomColor(), weight: 4 }]
+                                    },
+                                    createMarker: function (i, waypoint) {
+                                        return L.marker(waypoint.latLng).bindPopup(
+                                            `<strong>Friend:<strong>${journey.username}<br>
+                     <strong>Type:</strong> ${journey.type}<br>
+                     <strong>Duration:</strong> ${journey.duration.toFixed(2)} hours<br>
+                     <strong>Distance:</strong> ${journey.distance.toFixed(2)} km<br>
+                     <strong>Calories:</strong> ${journey.calories.toFixed(2)} kcal<br>
+                     <strong>Speed:</strong> ${journey.speed.toFixed(2)} km/h`
+                                        );
+                                    },
+                                    itinerary: false,
+                                    collapsible: true
+                                }).addTo(map);
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Error fetching or processing journeys:', error));
+
+                function getRandomColor() {
+                    const colors = [
+                        "#00429d", "#8c2981", "#fe6100", "#5d2b76", "#4cb5ae",
+                        "#007d34", "#c0369d", "#f13c1e", "#232c16", "#ca0147",
+                        "#00a9cf", "#a79d00", "#6b4423", "#e6194b", "#3cb44b"
+                    ];
+
+                    // Randomly pick a color from the array
+                    return colors[Math.floor(Math.random() * colors.length)];
+                }
+
+            });
+        </script>
     </div>
 
 </body>
@@ -354,48 +600,58 @@
 
 <script>
     window.onload = function () {
-        document.getElementById("btn1").click();
+        document.getElementById("oneBtn1").click();
     };
     function windowOpen1() {
         const window1 = document.getElementById("window1");
         const window2 = document.getElementById("window2");
         const window3 = document.getElementById("window3");
-        const window4 = document.getElementById("window4");
         window1.style.display = "block";
         window2.style.display = "none";
         window3.style.display = "none";
-        window4.style.display = "none";
     }
     function windowOpen2() {
         const window1 = document.getElementById("window1");
         const window2 = document.getElementById("window2");
         const window3 = document.getElementById("window3");
-        const window4 = document.getElementById("window4");
         window2.style.display = "block";
         window1.style.display = "none";
         window3.style.display = "none";
-        window4.style.display = "none";
     }
     function windowOpen3() {
         const window1 = document.getElementById("window1");
         const window2 = document.getElementById("window2");
         const window3 = document.getElementById("window3");
-        const window4 = document.getElementById("window4");
         window3.style.display = "block";
         window1.style.display = "none";
         window2.style.display = "none";
-        window4.style.display = "none";
     }
-    function windowOpen4() {
-        const window1 = document.getElementById("window1");
-        const window2 = document.getElementById("window2");
-        const window3 = document.getElementById("window3");
-        const window4 = document.getElementById("window4");
-        window4.style.display = "block";
-        window1.style.display = "none";
+    function thewindowOpen1() {
+        
+        const window1 = document.getElementById("thewindow1");
+        const window2 = document.getElementById("thewindow2");
+
+        window1.style.display = "flex";
         window2.style.display = "none";
-        window3.style.display = "none";
+        document.getElementById("btn1").click();
     }
+    function thewindowOpen2() {
+        const window1 = document.getElementById("thewindow1");
+        const window2 = document.getElementById("thewindow2");
+        window2.style.display = "block";
+        window1.style.display = "none";
+
+    }
+</script>
+
+<script>
+    const btnElList1 = document.querySelectorAll('.oneBtn');
+    btnElList1.forEach(btnEl => {
+        btnEl.addEventListener('click', () => {
+            document.querySelector('.special2')?.classList.remove('special2');
+            btnEl.classList.add('special2');
+        })
+    })
 </script>
 
 
