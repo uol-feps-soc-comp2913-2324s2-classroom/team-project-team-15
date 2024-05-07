@@ -3,9 +3,9 @@
 {% endblock %}
 {% block navbar %}
 <nav id="navbar">
-    <a href="{{ url_for('upload_gps') }}" class="nav-button">Add Journey</a>
-    <a href="{{ url_for('friends') }}" class="nav-button">Friends</a>
-    <a href="{{ url_for('display_journeys') }}" class="nav-button">Home</a>
+    <a href="{{ url_for('upload_gps') }}" class="icon-button"><i class='bx bx-message-square-add'></i></a>
+    <a href="{{ url_for('friends') }}" class="icon-button"><i class='bx bxs-group'></i></a>
+    <a href="{{ url_for('display_journeys') }}" class="icon-button"><i class='bx bx-trip'></i></a>
     <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
 
 </nav>
@@ -17,10 +17,6 @@
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background-color: #9f9f9f73;
         font-weight: 600;
-    }
-
-    h2 {
-        text-align: center;
     }
 
     .container1 {
@@ -170,8 +166,6 @@
         background-color: #908282;
     }
 </style>
-
-<h2>Your Journeys</h2>
 <div class="part1" id="part1">
     <div class="container1">
         <div class="table-container4">
