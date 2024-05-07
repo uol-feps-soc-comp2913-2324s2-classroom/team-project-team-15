@@ -29,9 +29,7 @@
 
     /* Card styling for the map */
     .map-card {
-        flex-grow: 1;
         display: flex;
-        flex: 1 1 60%;
         justify-content: center;
         align-items: center;
         border: 1px solid #cccccc;
@@ -48,11 +46,13 @@
         /* Margin around the card to separate from other elements */
         height: 500px;
         /* Fixed height for the map */
-        width: 60%;
+        width: 100%;
         /* Adjust width as necessary */
         flex-wrap: wrap;
         flex-direction: row;
         align-content: space-around;
+
+
     }
 
     .searchResults1 button {
@@ -346,16 +346,21 @@
 
             </div>
         </div>
-        <div class="map-card" style="display: none;" id="thewindow2">
-            <div id="map"></div>
+        <div class="map-card" id="thewindow2">
+            <div id="map" style="width: 100%; height: 100%;"></div>
         </div>
         <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const map = L.map('map').setView([51.505, -0.09], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
+                const map = L.map('map', {
+                    center: [51.505, -0.09], // Adjust this to your default center
+                    zoom: 13,
+                    layers: [
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        })
+                    ]
+                });
 
                 fetch('/api/friends/latest-journeys')
                     .then(response => response.json())
@@ -602,6 +607,7 @@
     window.onload = function () {
         document.getElementById("oneBtn1").click();
     };
+
     function windowOpen1() {
         const window1 = document.getElementById("window1");
         const window2 = document.getElementById("window2");
@@ -627,7 +633,7 @@
         window2.style.display = "none";
     }
     function thewindowOpen1() {
-        
+
         const window1 = document.getElementById("thewindow1");
         const window2 = document.getElementById("thewindow2");
 
