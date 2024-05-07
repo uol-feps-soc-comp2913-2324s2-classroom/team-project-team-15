@@ -6,6 +6,7 @@
     
     <link rel="stylesheet" href="{{ url_for('static',filename='css/base.css')}}">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
         body {
@@ -124,7 +125,6 @@
             </nav>
         </div>
     </header>
-
     <div class="part1" id="part1" style="display: none;">
         <!-- <h1 class="text-center">User Details</h1> -->
         <div class="container1">
@@ -140,13 +140,15 @@
                         </tr>
                     </thead>
                     <tbody>
+
+                        
                         {% for user, expiry_date in users_with_expiry_dates %}
                         <tr class="horizontal-border">
                             <td>{{ user.id }}</td>
                             <td>{{ user.username }}</td>
                             <td>{{ user.email}}</td>
                             {% if user.subscription_plan %}
-                            <td>{{ user.subscription_plan.plan_name }}</td>
+                                <td>{{ user.subscription_plan.plan_name }}</td>
                             {% else %}
                             <td>None</td>
                             {% endif %}
@@ -169,41 +171,40 @@
             <div class="cards1">
                 <div class="card1">
                     <div class="card1-content">
-                        <div class="number">1271</div>
-                        <div class="card1-name">Users</div>
+                        <div class="number">£{{ total }}</div>
+                        <div class="card1-name">Revenue (1 year ahead)</div>
                     </div>
                     <div class="icon-box">
-                        <i class="fas fa-user-graduate"></i>
+                        <i class='bx bx-money'></i>
+                    </div>
+                </div>
+                <div class="card1">
+                    <div class="card1-content">
+                        <div class="number">{{ users_with_expiry_dates|length }}</div>
+                        <div class="card1-name">Total Users</div>
+                    </div>
+                    <div class="icon-box">
+                        <i class='bx bxs-user'></i>
                     </div>
                 </div>
 
                 <div class="card1">
                     <div class="card1-content">
-                        <div class="number">1271</div>
-                        <div class="card1-name">Users</div>
+                        <div class="number">1</div>
+                        <div class="card1-name">Admins</div>
                     </div>
                     <div class="icon-box">
-                        <i class="fas fa-user-graduate"></i>
+                        <i class='bx bxs-user-voice'></i>
                     </div>
                 </div>
 
                 <div class="card1">
                     <div class="card1-content">
-                        <div class="number">1271</div>
-                        <div class="card1-name">Users</div>
+                        <div class="number">3</div>
+                        <div class="card1-name">Subscription Types</div>
                     </div>
                     <div class="icon-box">
-                        <i class="fas fa-user-graduate"></i>
-                    </div>
-                </div>
-
-                <div class="card1">
-                    <div class="card1-content">
-                        <div class="number">1271</div>
-                        <div class="card1-name">Users</div>
-                    </div>
-                    <div class="icon-box">
-                        <i class="fas fa-user-graduate"></i>
+                        <i class='bx bxs-copy-alt'></i>
                     </div>
                 </div>
             </div>

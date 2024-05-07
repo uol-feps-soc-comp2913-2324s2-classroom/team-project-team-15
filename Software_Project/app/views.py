@@ -111,6 +111,7 @@ def login():
 def admin():
     active_subscriptions = User.query.filter(User.subscription_start_date.isnot(None)).all()
     Users =  User.query.all()
+    
     users_with_expiry_dates = db.session.query(User, Payment.card_expiry_date).\
     outerjoin(Payment).all()
 
@@ -144,6 +145,8 @@ def admin():
                     current_date += timedelta(days=30)  # Approximate, adjust as needed
                 elif duration == 'annually':
                     current_date += timedelta(days=365)  # Approximate, adjust as needed
+    total = sum(weekly_revenue.values())
+    total = round(total, 2)
 
     subscription_counts = defaultdict(int)
     for user in User.query.filter(User.subscription_plan_id.isnot(None)).all():
@@ -153,7 +156,9 @@ def admin():
     print(sorted_weekly_revenue)
     sorted_weekly_revenue = sorted(weekly_revenue.items())
 
-    return render_template('admin.html', revenue_data=sorted_weekly_revenue, subscription_counts=subscription_counts, Users=Users, users_with_expiry_dates=users_with_expiry_dates)
+
+
+    return render_template('admin.html', revenue_data=sorted_weekly_revenue, subscription_counts=subscription_counts, Users=Users, users_with_expiry_dates=users_with_expiry_dates, total=total)
 
 @app.route('/logout')
 @login_required
