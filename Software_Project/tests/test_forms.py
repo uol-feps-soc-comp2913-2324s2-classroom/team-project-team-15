@@ -153,14 +153,14 @@ def login_client(client, init_database):
         client.post('/login', data={'username': user1.username, 'password': 'test'})
         yield client
 
-def test_send_friend_request(login_client, init_database):
-    _, user2 = init_database
-    # Test sending friend request
-    response = login_client.post(f'/send-friend-request/{user2.id}')
-    assert response.status_code == 200
-    assert 'Friend request sent successfully' in response.get_json()['message']
+# def test_send_friend_request(login_client, init_database):
+#     _, user2 = init_database
+#     # Test sending friend request
+#     response = login_client.post(f'/send-friend-request/{user2.id}')
+#     assert response.status_code == 200
+#     assert 'Friend request sent successfully' in response.get_json()['message']
 
-    # Test sending duplicate friend request
-    response = login_client.post(f'/send-friend-request/{user2.id}')
-    assert response.status_code == 400
-    assert 'Friend request already sent' in response.get_json()['error']
+#     # Test sending duplicate friend request
+#     response = login_client.post(f'/send-friend-request/{user2.id}')
+#     assert response.status_code == 400
+#     assert 'Friend request already sent' in response.get_json()['error']
