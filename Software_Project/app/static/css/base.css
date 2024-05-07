@@ -14,8 +14,8 @@ body {
 }
 
 .friendsBody {
-    /* background-color: #ff6600a7;  */
-    background: #8787879b;
+    background-color: #ff660028; 
+    /* background: #8787879b; */
 
 }
 
@@ -40,7 +40,7 @@ body {
 .fNavBtn {
     background-color: transparent;
     border: none;
-    color: white;
+    color: rgb(88, 88, 88);
     padding: 0;
     font-weight: 700;
     cursor: pointer;
@@ -100,6 +100,22 @@ body {
     background-color: #b6b6b6;
     border: 2px solid #ff6600;
     color: white;
+    padding: 0;
+    font-weight: 700;
+    cursor: pointer;
+    margin: 3% 0 0 0;
+    /* padding: 2%; */
+    width: 200px;
+    height: 50px;
+    font-weight: 800;
+    font-size: 15px;
+}
+
+
+.special2{
+    background-color: #ffffff;
+    border: 2px solid #ff6600;
+    color: rgb(108, 108, 108);
     padding: 0;
     font-weight: 700;
     cursor: pointer;
@@ -205,7 +221,7 @@ body {
 .mainWhite {
     display: flex;
     flex-direction: column;
-    height: 80vh;
+    height: 60vh;
     width: 500px;
     background-color: none;
     border: 3px solid #ff6600;
@@ -227,6 +243,12 @@ body {
     background-color: #ff6600;
     padding: 1vw;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+.twoBtns1{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
 }
 
 
