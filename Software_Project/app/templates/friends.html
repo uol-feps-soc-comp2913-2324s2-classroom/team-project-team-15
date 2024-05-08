@@ -105,7 +105,7 @@
                 <div class="friendsNav">
                     <button class="fNavBtn" id="btn1" onclick="windowOpen1()"><i class='bx bx-search'
                             style='font-size: 24px;'><br></i>Search</button>
-                    <button class="fNavBtn" onclick="windowOpen2()"><i class='bx bx-user-circle'
+                    <button class="fNavBtn" id="btn2" onclick="windowOpen2()"><i class='bx bx-user-circle'
                             style='font-size: 24px;'><br></i>My Friends </button>
                     <button class="fNavBtn" onclick="windowOpen3()"><i class='bx bxs-inbox'
                             style='font-size: 24px;'><br></i>Requests</button>
@@ -460,6 +460,7 @@
                     // On success, remove the friend item from the list
                     $(`#friend-${friendId}`).remove();
                     alert('Friend successfully unfriended.');
+                    location.reload();    
                 },
                 error: function (xhr, status, error) {
                     // Handle errors (e.g., friend not found, not authenticated)

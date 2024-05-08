@@ -21,40 +21,49 @@
 {% endblock %}
 
 {% block body %}
-<form action="{{ url_for('upload_gps') }}" method="post" enctype="multipart/form-data" class="p-3 border bg-light">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+<style>
 
-    <div class="mb-3">
-        <label for="name" class="form-label">Name:</label>
-        <input type="text" class="form-control" id="name" name="name" required>
-    </div>
+    body{
+        background-color: #ff660028;
+    }
+</style>
+<div class="formDiv">
+    <form action="{{ url_for('upload_gps') }}" method="post" enctype="multipart/form-data" class="p-3 border bg-light" id="theForming">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    
+        <div class="mb-3">
+            <label for="name" class="form-label">Name:</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+    
+        <div class="mb-3">
+            <label for="gpsdata" class="form-label">GPS Data File:</label>
+            <input type="file" class="form-control" id="gpsdata" name="gpsdata" required required
+                onchange="parseGPXFile(event)">
+        </div>
+    
+        <div class="mb-3">
+            <label for="type" class="form-label">Activity Type:</label>
+            <select class="form-select" id="type" name="type">
+                <option value="running">Running</option>
+                <option value="cycling">Cycling</option>
+            </select>
+        </div>
+    
+        <div class="mb-3">
+            <label for="startTime" class="form-label">Start Time:</label>
+            <input type="datetime-local" class="form-control" id="startTime" name="startTime" required>
+        </div>
+    
+        <div class="mb-3">
+            <label for="endTime" class="form-label">End Time:</label>
+            <input type="datetime-local" class="form-control" id="endTime" name="endTime" required>
+        </div>
+    
+        <button type="submit" class="btn btn-info btn-sm">Upload GPS Data</button>
+    </form>
+</div>
 
-    <div class="mb-3">
-        <label for="gpsdata" class="form-label">GPS Data File:</label>
-        <input type="file" class="form-control" id="gpsdata" name="gpsdata" required required
-            onchange="parseGPXFile(event)">
-    </div>
-
-    <div class="mb-3">
-        <label for="type" class="form-label">Activity Type:</label>
-        <select class="form-select" id="type" name="type">
-            <option value="running">Running</option>
-            <option value="cycling">Cycling</option>
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label for="startTime" class="form-label">Start Time:</label>
-        <input type="datetime-local" class="form-control" id="startTime" name="startTime" required>
-    </div>
-
-    <div class="mb-3">
-        <label for="endTime" class="form-label">End Time:</label>
-        <input type="datetime-local" class="form-control" id="endTime" name="endTime" required>
-    </div>
-
-    <button type="submit" class="btn btn-info btn-sm">Upload GPS Data</button>
-</form>
 
 {% if error %}
 <p>{{ error }}</p>
