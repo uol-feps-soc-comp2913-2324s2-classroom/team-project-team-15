@@ -81,6 +81,10 @@ def index():
     Returns:
         Rendered 'home.html' template for the site's home page.
     """
+    if current_user.is_authenticated and current_user.username == 'admin':
+        return redirect(url_for('admin'))  
+    elif current_user.is_authenticated:
+            return redirect(url_for('display_journeys'))  
     return render_template('home.html')
         
 
