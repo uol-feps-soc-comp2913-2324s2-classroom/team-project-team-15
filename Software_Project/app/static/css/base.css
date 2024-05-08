@@ -37,6 +37,16 @@ body {
     background-color: none;
 }
 
+.formDiv{
+    margin:5%;
+    border: 3px solid #ff6600;
+    border-radius: 15px;
+}
+#theForming{
+    background: #ff660028;
+    border-radius: 15px;
+}
+
 .fNavBtn {
     background-color: transparent;
     border: none;
