@@ -144,9 +144,9 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(username=username).first()  # Query the user from the database
         if user and check_password_hash(user.password_hash, password):  # Validate password
-            if is_admin:
-                return redirect(url_for('admin'))  # Special redirect for admin users
             login_user(user) 
+            if current_user.is_authenticated and current_user.username == 'admin':
+                return redirect(url_for('admin'))  
             if not user.subscription_plan_id:
                 return redirect(url_for('choose_subscription'))  # Redirect to subscription choice if not set
             return redirect(url_for('display_journeys'))  # Redirect to main content page
@@ -170,16 +170,6 @@ def logout():
     return redirect(url_for('index'))  # Redirect to the home page 
 
 
-def is_admin():
-    """
-    Check if the current logged-in user is an administrator.
-    
-    Returns:
-        Boolean: True if the current user is authenticated as 'admin', False otherwise.
-    """
-    return (current_user.is_authenticated and current_user.username == 'admin'
-            and current_user.password == 'adminPass')
-
 
 @app.route('/admin', methods=['GET', 'POST'])
 @login_required
@@ -194,62 +184,61 @@ def admin():
         - Subscription counts by plan.
         - User data and payment card expiry dates.
     """
-    if is_admin():
         # Query users with active subscriptions
-        active_subscriptions = User.query.filter(User.subscription_start_date.isnot(None)).all()
-        Users = User.query.all()
-        
-        # Query all users and their payment card expiry dates if available
-        users_with_expiry_dates = db.session.query(User, Payment.card_expiry_date).\
-        outerjoin(Payment).all()
+    active_subscriptions = User.query.filter(User.subscription_start_date.isnot(None)).all()
+    Users = User.query.all()
+    
+    # Query all users and their payment card expiry dates if available
+    users_with_expiry_dates = db.session.query(User, Payment.card_expiry_date).\
+    outerjoin(Payment).all()
 
-        # Initialize weekly revenue dictionary
-        weekly_revenue = {}
-        current_date = datetime.now().date()
-        end_date = current_date + timedelta(days=365)
+    # Initialize weekly revenue dictionary
+    weekly_revenue = {}
+    current_date = datetime.now().date()
+    end_date = current_date + timedelta(days=365)
 
-        # Populate initial weekly revenue data
-        while current_date <= end_date:
-            week_start = current_date - timedelta(days=current_date.weekday())
-            weekly_revenue[week_start.strftime('%Y-%m-%d')] = 0
-            current_date += timedelta(weeks=1)
+    # Populate initial weekly revenue data
+    while current_date <= end_date:
+        week_start = current_date - timedelta(days=current_date.weekday())
+        weekly_revenue[week_start.strftime('%Y-%m-%d')] = 0
+        current_date += timedelta(weeks=1)
 
-        # Calculate weekly revenue from active subscriptions
-        for user in active_subscriptions:
-            subscription_plan = SubscriptionPlan.query.get(user.subscription_plan_id)
-            if subscription_plan:
-                start_date = user.subscription_start_date
-                duration = subscription_plan.plan_name.lower()
-                price = subscription_plan.price
+    # Calculate weekly revenue from active subscriptions
+    for user in active_subscriptions:
+        subscription_plan = SubscriptionPlan.query.get(user.subscription_plan_id)
+        if subscription_plan:
+            start_date = user.subscription_start_date
+            duration = subscription_plan.plan_name.lower()
+            price = subscription_plan.price
 
-                current_date = start_date
-                while current_date <= end_date:
-                    week_start = current_date - timedelta(days=current_date.weekday())
-                    week_end = week_start + timedelta(days=6)
-                    if current_date >= start_date and current_date <= week_end:
-                        weekly_revenue[week_start.strftime('%Y-%m-%d')] += price
-                    if duration == 'weekly':
-                        current_date += timedelta(weeks=1)
-                    elif duration == 'monthly':
-                        current_date += timedelta(days=30)
-                    elif duration == 'annually':
-                        current_date += timedelta(days=365)
-        
-        # Sum and round total revenue
-        total = round(sum(weekly_revenue.values()), 2)
+            current_date = start_date
+            while current_date <= end_date:
+                week_start = current_date - timedelta(days=current_date.weekday())
+                week_end = week_start + timedelta(days=6)
+                if current_date >= start_date and current_date <= week_end:
+                    weekly_revenue[week_start.strftime('%Y-%m-%d')] = weekly_revenue.get(week_start.strftime('%Y-%m-%d'), 0) + price 
+                if duration == 'weekly':
+                    current_date += timedelta(weeks=1)
+                elif duration == 'monthly':
+                    current_date += timedelta(days=30)
+                elif duration == 'annually':
+                    current_date += timedelta(days=365)
+    
+    # Sum and round total revenue
+    total = round(sum(weekly_revenue.values()), 2)
 
-        # Count subscriptions by plan
-        subscription_counts = defaultdict(int)
-        for user in User.query.filter(User.subscription_plan_id.isnot(None)).all():
-            subscription_counts[user.subscription_plan.plan_name] += 1
-        
-        # Sort the revenue data by date
-        sorted_weekly_revenue = sorted(weekly_revenue.items())
+    # Count subscriptions by plan
+    subscription_counts = defaultdict(int)
+    for user in User.query.filter(User.subscription_plan_id.isnot(None)).all():
+        subscription_counts[user.subscription_plan.plan_name] += 1
+    
+    # Sort the revenue data by date
+    sorted_weekly_revenue = sorted(weekly_revenue.items())
 
-        # Render the admin dashboard
-        return render_template('admin.html', revenue_data=sorted_weekly_revenue, 
-                               subscription_counts=subscription_counts, Users=Users, 
-                               users_with_expiry_dates=users_with_expiry_dates, total=total)
+    # Render the admin dashboard
+    return render_template('admin.html', revenue_data=sorted_weekly_revenue, 
+                            subscription_counts=subscription_counts, Users=Users, 
+                            users_with_expiry_dates=users_with_expiry_dates, total=total)
 
 
 
