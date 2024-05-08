@@ -5,11 +5,18 @@
 {% endblock %}
 {% block navbar %}
 <nav id="navbar">
-    <a href="{{ url_for('list_journeys') }}" class="icon-button"><i class='bx bx-list-ul'></i></a>
-    <a href="{{ url_for('friends') }}" class="icon-button"><i class='bx bxs-group'></i></a>
-    <a href="{{ url_for('display_journeys') }}" class="icon-button"><i class='bx bx-trip'></i></a>
-    <button class="icon-button" onclick="SignUp()"><i class="bx bx-user"></i></button>
-
+    <a href="{{ url_for('list_journeys') }}" class="icon-button" title="Journeys List ">
+        <i class='bx bx-list-ul'></i>
+    </a>
+    <a href="{{ url_for('friends') }}" class="icon-button" title="Friends">
+        <i class='bx bxs-group'></i>
+    </a>
+    <a href="{{ url_for('display_journeys') }}" class="icon-button" title="Display Journeys">
+        <i class='bx bx-trip'></i>
+    </a>
+    <button class="icon-button" onclick="SignUp()" title="Profile">
+        <i class="bx bx-user"></i>
+    </button>
 </nav>
 {% endblock %}
 
@@ -46,7 +53,7 @@
         <input type="datetime-local" class="form-control" id="endTime" name="endTime" required>
     </div>
 
-    <button type="submit" class="btn btn-primary">Upload GPS Data</button>
+    <button type="submit" class="btn btn-info btn-sm">Upload GPS Data</button>
 </form>
 
 {% if error %}

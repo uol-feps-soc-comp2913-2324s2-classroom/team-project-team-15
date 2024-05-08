@@ -1,10 +1,8 @@
-from sqlalchemy import ForeignKeyConstraint, UniqueConstraint
+from sqlalchemy import ForeignKeyConstraint
 from app import db
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta
-from sqlalchemy.dialects.postgresql import UUID
+from datetime import datetime
 import uuid
 import math
 
@@ -127,9 +125,3 @@ class Payment(db.Model):
         self.payment_method_type = card_type
         self.card_expiry_date = expiry_date
         db.session.commit()
-
-class RevenueEstimate(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date, nullable=False)
-    total_revenue = db.Column(db.Float, nullable=False)
-    calculation_details = db.Column(db.Text)
